@@ -85,12 +85,12 @@ export const spineModelConfig: SpineModelConfig = {
 // Live2D 看板娘配置 (使用 l2d-widget 库，文档：https://l2d-widget.hacxy.cn)
 export const live2dWidgetConfig: Live2DWidgetConfig = {
 	// Live2D 看板娘开关
-	enable: false,
+	enable: true,
 	// 模型配置，支持单个模型或数组（多模型切换）
 	model: [
 		{
 			// Live2D模型本地文件路径
-			path: "/pio/models/live2d/snow_miku/model.json",
+			path: "/pio/models/live2d/nepnep/index.json",
 			// 动作声音音量 范围0~1，默认 0（静音）
 			volume: 0,
 			// 模型缩放比例
@@ -101,18 +101,59 @@ export const live2dWidgetConfig: Live2DWidgetConfig = {
 			y: 0,
 		},
 		{
-			// 外部直连模型
-			path: "https://model.hacxy.cn/cat-black/model.json",
+			// Live2D模型本地文件路径
+			path: "/pio/models/live2d/nepmaid/index.json",
+			// 动作声音音量 范围0~1，默认 0（静音）
 			volume: 0,
+			// 模型缩放比例
 			scale: 1,
+			// X轴偏移，范围 -2~2，正值向右
 			x: 0,
+			// Y轴偏移，范围 -2~2，正值向上
 			y: 0,
 		},
+		{
+			// Live2D模型本地文件路径
+			path: "/pio/models/live2d/nepswim/index.json",
+			// 动作声音音量 范围0~1，默认 0（静音）neptune_classic
+			volume: 0,
+			// 模型缩放比例
+			scale: 1,
+			// X轴偏移，范围 -2~2，正值向右
+			x: 0,
+			// Y轴偏移，范围 -2~2，正值向上
+			y: 0,
+		},
+		{
+			// Live2D模型本地文件路径
+			path: "/pio/models/live2d/neptune_classic/index.json",
+			// 动作声音音量 范围0~1，默认 0（静音）neptune_santa
+			volume: 0,
+			// 模型缩放比例
+			scale: 1,
+			// X轴偏移，范围 -2~2，正值向右
+			x: 0,
+			// Y轴偏移，范围 -2~2，正值向上
+			y: 0,
+		},
+		{
+			// Live2D模型本地文件路径
+			path: "/pio/models/live2d/neptune_santa/index.json",
+			// 动作声音音量 范围0~1，默认 0（静音）neptune_santa
+			volume: 0,
+			// 模型缩放比例
+			scale: 1,
+			// X轴偏移，范围 -2~2，正值向右
+			x: 0,
+			// Y轴偏移，范围 -2~2，正值向上
+			y: 0,
+		},
+		
 	],
 	// 显示位置：bottom-left 或 bottom-right
-	position: "bottom-left" as const,
+	position: "bottom-right" as const,
 	// 画布尺寸（px）
-	size: { width: 200, height: 200 },
+	size: { width: 300, height: 300 },
 	// 主题色，用于菜单、状态条等 UI 元素的背景色，默认 'rgba(96,165,250,0.9)'
 	primaryColor: "var(--l2d-msg-bg)",
 	// 入场/退场动画时长（ms）
@@ -157,22 +198,25 @@ export const live2dWidgetConfig: Live2DWidgetConfig = {
 		// 气泡开关
 		enable: true,
 		// 初始欢迎消息
-		welcomeMessage: ["你好呀！", "欢迎来到我的世界！"],
+		welcomeMessage: ["你好呀！💖欢迎来到我的世界！✨✨"],
 		// 循环提示内容
 		messages: [
-			"有什么需要帮助的吗？",
-			"今天天气真不错呢！",
-			"要不要一起玩游戏？",
+			"叶舟虽无力，却过万重山。",
+			"秋叶牵思半金缕，玉露泛珠杏落黄！",
+			"断骨残肉更自强，长夜泣心又何妨！",
+			"嬿婉桃夭醉韵，莫忘少时云华。",
+			"劝君长离莫回还，自此分道两不关!",
+			"随鸟青堤上，柳卧草如茵。",
 			"记得按时休息哦！",
 		],
 		// 文字显示时间（ms）
-		duration: 3000,
+		duration: 4000,
 		// 提示气泡切换间隔（ms）
-		interval: 6000,
+		interval: 10000,
 		// 位置偏移量（px），基于默认位置（模型正上方居中）进行微调
 		offset: {
-			x: 0, // 正值右移，负值左移
-			y: 0, // 正值下移，负值上移
+			x: -100, // 正值右移，负值左移
+			y: -100, // 正值下移，负值上移
 		},
 	},
 	// 响应式配置

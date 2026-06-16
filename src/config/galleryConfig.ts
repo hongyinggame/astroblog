@@ -34,6 +34,14 @@ export const galleryConfig: GalleryConfig = {
 			password: "123456",
 			passwordHint: "示例密码123456",
 		},
+		{
+			id: "neptune",
+			name: "绀紫之心-涅普缇努",
+			description: "勇敢活，放肆笑！",
+			location: "超次元游戏 海王星",
+			date: "2026-02-01",
+			tags: ["超次元游戏", "涅普缇努"],
+		},
 	],
 
 	// 瀑布流最小列宽(px)，浏览器根据容器宽度自动计算列数，默认 240
