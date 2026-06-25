@@ -1,0 +1,101 @@
+/* Giscus custom theme — transparent to let wrapper gradient show through */
+
+html, body {
+  --color-bg-primary: transparent;
+  --color-bg-secondary: transparent;
+  --color-bg-tertiary: transparent;
+  --color-bg-canvas: transparent;
+  --color-bg-canvas-inset: transparent;
+  --color-bg-overlay: transparent;
+  --color-bg-info: transparent;
+  --color-bg-success: transparent;
+
+  --color-text-primary: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(255, 255, 255, 0.65);
+  --color-text-tertiary: rgba(255, 255, 255, 0.45);
+  --color-text-link: #e0d0ff;
+
+  --color-border-primary: rgba(255, 255, 255, 0.12);
+  --color-border-secondary: rgba(255, 255, 255, 0.08);
+
+  --color-accent-fg: #c4b0ff;
+  --color-accent-emphasis: #c4b0ff;
+  --color-accent-muted: rgba(196, 176, 255, 0.35);
+  --color-accent-subtle: rgba(196, 176, 255, 0.12);
+
+  --color-btn-primary-bg: rgba(161, 140, 209, 0.7);
+  --color-btn-primary-text: #fff;
+  --color-btn-primary-border: transparent;
+  --color-btn-primary-hover-bg: rgba(180, 160, 220, 0.8);
+
+  --color-btn-secondary-bg: rgba(255, 255, 255, 0.08);
+  --color-btn-secondary-text: rgba(255, 255, 255, 0.8);
+  --color-btn-secondary-hover-bg: rgba(255, 255, 255, 0.14);
+
+  --color-btn-text: rgba(255, 255, 255, 0.8);
+  --color-btn-bg: rgba(255, 255, 255, 0.08);
+  --color-btn-border: rgba(255, 255, 255, 0.12);
+  --color-btn-hover-bg: rgba(255, 255, 255, 0.15);
+  --color-btn-hover-border: rgba(255, 255, 255, 0.2);
+
+  --color-box-bg-info: rgba(161, 140, 209, 0.1);
+  --color-box-border-info: rgba(196, 176, 255, 0.2);
+
+  --color-social-reaction-bg: rgba(255, 255, 255, 0.06);
+  --color-social-reaction-hover-bg: rgba(255, 255, 255, 0.14);
+  --color-social-reaction-border: rgba(255, 255, 255, 0.1);
+
+  font-family: inherit;
+}
+
+/* Comment box textarea — transparent with subtle border */
+textarea, input[type="text"], input[type="email"], input[type="url"] {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 10px 14px !important;
+}
+
+textarea:focus, input:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(196, 176, 255, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.15) !important;
+  outline: none !important;
+}
+
+/* Buttons */
+.btn-primary, button[type="submit"], .gsc-comment-box button {
+  background: linear-gradient(135deg, rgba(161, 140, 209, 0.7), rgba(210, 160, 210, 0.6)) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: white !important;
+  padding: 8px 18px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+}
+
+.btn-primary:hover, button[type="submit"]:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 14px rgba(161, 140, 209, 0.3) !important;
+}
+
+/* Comment items — transparent with subtle border */
+.gsc-comment, .gsc-tl-line, .timeline-comment {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+  margin-bottom: 8px !important;
+}
+
+.gsc-comment:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Reactions */
+.gsc-reactions-button {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+}
