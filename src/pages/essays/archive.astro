@@ -1,0 +1,144 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Navbar from "@/components/layout/Navbar.astro";
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import BackgroundEffects from "@/components/effects/BackgroundEffects.svelte";
+import ArchivePanel from "@/components/controls/ArchivePanel.svelte";
+import Live2DWidget from "@/components/features/Live2DWidget.astro";
+import SpineModel from "@/components/features/SpineModel.astro";
+import { backgroundWallpaper, live2dWidgetConfig, siteConfig } from "@/config";
+import { getCollection } from "astro:content";
+import { Icon } from "astro-icon/components";
+
+const allEssays = await getCollection("essays", ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+});
+const sortedEssays = allEssays
+  .filter((e) => !e.data.draft)
+  .sort((a, b) => new Date(b.data.published).getTime() - new Date(a.data.published).getTime())
+  .map((e) => ({
+    id: e.id,
+    data: {
+      title: e.data.title,
+      tags: e.data.tags || [],
+      published: e.data.published,
+    },
+  }));
+
+const backgroundImages = backgroundWallpaper.src;
+let bgImage = "";
+let bgImageMobile = "";
+if (
+  typeof backgroundImages === "object" &&
+  backgroundImages !== null &&
+  !Array.isArray(backgroundImages) &&
+  "desktop" in backgroundImages
+) {
+  const d = backgroundImages.desktop;
+  const m = backgroundImages.mobile;
+  if (Array.isArray(d)) bgImage = d[Math.floor(Math.random() * d.length)];
+  else if (d) bgImage = d;
+  if (Array.isArray(m)) bgImageMobile = m[Math.floor(Math.random() * m.length)];
+  else if (m) bgImageMobile = m;
+  else bgImageMobile = bgImage;
+} else if (typeof backgroundImages === "string") {
+  bgImage = backgroundImages;
+  bgImageMobile = backgroundImages;
+}
+
+const themeColors = ["#a18cd1", "#fbc2eb", "#a1c4fd", "#c2e9fb"];
+
+const stickyNavbar = siteConfig.navbar.stickyNavbar ?? false;
+const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
+
+---
+
+<Layout title="归档杂谈" description="所有杂谈归档">
+  <script is:inline>document.body.classList.add("is-standalone")</script>
+  <div id="banner-overlay-container" style="display:none"></div>
+  <div id="banner-dim-container" style="display:none"></div>
+  <div id="left-sidebar-dynamic" style="display:none"></div>
+  <div id="swup-container">
+
+  <!-- Fixed Background Layer -->
+  <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+    {bgImageMobile && (
+      <div class="absolute inset-0 block lg:hidden">
+        <ImageWrapper src={bgImageMobile} alt="" class="!absolute !inset-0 !w-full !h-full" loading="eager" fetchpriority="high" widths={[640, 750, 1080]} sizes="100vw" />
+      </div>
+    )}
+    {bgImage && (
+      <div class="absolute inset-0 hidden lg:block">
+        <ImageWrapper src={bgImage} alt="" class="!absolute !inset-0 !w-full !h-full" loading="eager" fetchpriority="high" widths={[1280, 1920, 2560]} sizes="100vw" />
+      </div>
+    )}
+    <div class="absolute inset-0 z-[1] bg-white/30 dark:bg-slate-900/40 backdrop-blur-md transition-colors duration-1000"></div>
+    <div class="absolute inset-0 z-[2] opacity-60 dark:opacity-20 mix-blend-color transition-opacity duration-1000"
+      style={`background: linear-gradient(-45deg, ${themeColors.join(", ")}); background-size: 400% 400%; animation: archiveGradientMove 15s ease infinite;`}></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-white/40 dark:bg-indigo-900/20 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-purple-900/30 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+  </div>
+    <!-- Navbar -->
+  <div
+    id="top-row"
+    class="z-50 pointer-events-none relative transition-all duration-700 mx-auto"
+    class:list={[
+      stickyNavbar ? "h-18 fixed top-0 left-0 right-0 z-80" : "",
+      navbarWidthFull ? "" : "w-full xl:w-[92vw] max-w-(--page-width) px-0 md:px-4",
+    ]}
+  >
+    <div
+      id="navbar-wrapper"
+      class:list={[
+        "pointer-events-auto transition-all",
+        stickyNavbar ? "" : "sticky top-0",
+      ]}
+    >
+      <Navbar />
+    </div>
+  </div>
+
+  <main class="relative z-10 min-h-screen pt-24 md:pt-28 pb-10">
+    <div class="max-w-3xl mx-auto px-4">
+
+      <!-- Nav pills -->
+      <div class="flex gap-2 mb-6">
+        <button onclick="history.back()" class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl font-medium cursor-pointer border-none
+          text-(--btn-content) bg-[color-mix(in_srgb,var(--btn-content)_6%,transparent)]
+          shadow-md shadow-(--primary)/20
+          hover:text-white hover:bg-(--primary) hover:shadow-lg hover:shadow-(--primary)/30
+          transition-all duration-200 ease-out">
+          <Icon name="material-symbols:arrow-back" is:inline class="text-lg" />
+        </button>
+        <a href="/essays/" class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl font-medium no-underline
+          text-(--btn-content) bg-[color-mix(in_srgb,var(--btn-content)_6%,transparent)]
+          shadow-md shadow-(--primary)/20
+          hover:text-white hover:bg-(--primary) hover:shadow-lg hover:shadow-(--primary)/30
+          transition-all duration-200 ease-out">
+          <Icon name="material-symbols:home" is:inline class="text-lg" />
+        </a>
+        <span class="inline-flex items-center text-sm px-4 py-1.5 rounded-xl font-medium whitespace-nowrap
+          bg-(--primary) text-white">
+          归档杂谈
+        </span>
+      </div>
+
+      <!-- Archive timeline -->
+      <ArchivePanel sortedPosts={sortedEssays} urlPrefix="essays" client:only="svelte" />
+    </div>
+  </main>
+
+  <SpineModel></SpineModel>
+  {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  </div>
+  <div id="right-sidebar-dynamic" style="display:none"></div>
+  <div id="floating-toc-wrapper" style="display:none"></div>
+</Layout>
+
+<style is:global>
+  @keyframes archiveGradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>

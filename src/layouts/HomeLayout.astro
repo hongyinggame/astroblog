@@ -1,0 +1,137 @@
+---
+import Layout from "./Layout.astro";
+import Footer from "@/components/layout/Footer.astro";
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import { backgroundWallpaper, siteConfig } from "@/config";
+import {
+  BANNER_HEIGHT,
+  BANNER_HEIGHT_EXTEND,
+} from "@/constants/constants";
+import { getBackgroundImages } from "@/utils/layout-utils";
+import { getImageQuality } from "@/utils/image-utils";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const backgroundImages = getBackgroundImages();
+const isBannerMode = false;
+const isFullscreenMode = true;
+const isOverlayMode = backgroundWallpaper.mode === "overlay";
+const isBackgroundEnabled = backgroundWallpaper.mode !== "none";
+const isWallpaperSwitchable = backgroundWallpaper.switchable ?? true;
+
+const showBannerDim = (isBannerMode || isFullscreenMode) && isBackgroundEnabled;
+const dimOpacity = backgroundWallpaper.common?.dimOpacity ?? 0.15;
+
+const homeTextEnable = backgroundWallpaper.common?.homeText?.enable;
+const showHomeText =
+  (isBannerMode || isFullscreenMode) && !!homeTextEnable;
+
+const configQuality = getImageQuality();
+const mobileQuality = Math.round(configQuality * 0.9);
+
+const mainPanelTop = isBannerMode
+  ? `calc(${BANNER_HEIGHT}vh - 3.5rem)`
+  : "5.5rem";
+const finalMainPanelTop = isBackgroundEnabled ? mainPanelTop : "5.5rem";
+const stickyNavbar = siteConfig.navbar.stickyNavbar ?? false;
+const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
+
+---
+
+<Layout
+  title={title || siteConfig.title}
+  description={description || siteConfig.description}
+  banner=""
+>
+      <div id="banner-dim-container" class="hidden"></div>
+  </>
+  )}
+
+  <!-- Main Content -->
+  <div
+    class="absolute w-full z-30 pointer-events-none"
+    style={isFullscreenMode ? 'top: 0;' : `top: ${finalMainPanelTop}`}
+  >
+    <div class="relative w-full xl:w-[92vw] max-w-(--page-width) mx-auto pointer-events-auto">
+      <main class="home-main">
+        <div id="content-wrapper">
+          <slot />
+        </div>
+      </main>
+      <Footer />
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  .home-main {
+    padding: 1rem;
+  }
+  @media (min-width: 768px) {
+    .home-main {
+      padding: 1.5rem 2rem;
+    }
+  }
+
+  /* Override banner height for homepage */
+  body.is-home {
+    --banner-height: 0px;
+  }
+
+  .enable-banner #wallpaper-wrapper {
+    height: var(--banner-height-home);
+    transform: translateY(var(--banner-height-extend));
+  }
+  .enable-banner #banner {
+    height: var(--banner-height-home);
+    transform: translateY(0);
+  }
+
+  /* Glassmorphism universal card styles */
+  .glass-card {
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+  }
+  .dark .glass-card {
+    background: rgba(30,41,59,0.5);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  @media (max-width: 1023px) {
+    body.enable-banner #wallpaper-wrapper {
+      height: 100vh;
+      max-height: 100vh;
+      position: fixed;
+      top: 0;
+      transform: none;
+      z-index: 0;
+    }
+    body.enable-banner .absolute.w-full.z-30 {
+      position: relative !important;
+      top: 5.5rem !important;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Homepage fullscreen: wallpaper fixed to cover entire viewport */
+  body.is-home #wallpaper-wrapper.wallpaper-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    z-index: -1 !important;
+  }
+</style>

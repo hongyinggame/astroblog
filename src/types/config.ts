@@ -40,6 +40,8 @@ export type SiteConfig = {
 	// 站点开始日期，用于计算运行天数
 	siteStartDate?: string; // 格式: "YYYY-MM-DD"
 
+	cloudMusicIds?: string[]; // 云音乐歌单ID列表
+
 	// 可选：站点时区，使用 IANA 时区标识，例如 "Asia/Shanghai"、"UTC"
 	timezone?: string;
 
@@ -76,6 +78,9 @@ export type SiteConfig = {
 		menuAlign?: "left" | "center"; // 导航菜单对齐方式（仅桌面端菜单）
 		followTheme?: boolean; // 导航栏图标和标题是否跟随主题色
 		stickyNavbar?: boolean; // 导航栏是否固定在顶部始终可见
+		transparentMode?: "semi" | "full" | "semifull"; // 导航栏透明模式
+		enableBlur?: boolean; // 是否开启毛玻璃模糊效果
+		blur?: number; // 毛玻璃模糊度
 	};
 
 	showLastModified: boolean; // 控制"上次编辑"卡片显示的开关
@@ -89,6 +94,8 @@ export type SiteConfig = {
 		guestbook: boolean; // 留言板页面开关
 		bangumi: boolean;
 		gallery: boolean; // 相册页面开关
+		essays?: boolean; // 杂谈页面开关
+		chatters?: boolean; // 说说页面开关
 	};
 
 	// 分类导航栏开关
@@ -270,6 +277,14 @@ export type CommentConfig = {
 		locale: string | "auto";
 		// 是否统计访问量，true 启用访问量，false 关闭
 		visitorCount?: boolean;
+	};
+	gitalk?: {
+		clientID: string;
+		clientSecret: string;
+		repo: string;
+		owner: string;
+		admin: string[];
+		proxy?: string;
 	};
 	giscus?: {
 		repo: string;
@@ -528,6 +543,26 @@ export type SpineModelConfig = {
 	opacity?: number; // 透明度，0-1，默认1.0
 };
 
+// 首页配置
+export type HomepageConfig = {
+	heroTitle: string;
+	heroSubtitle: string;
+	cloudMusicIds: string[];
+	photoWall: {
+		enabled: boolean;
+		title: string;
+		description: string;
+	};
+	chatterSection?: {
+		title: string;
+		description: string;
+	};
+	essaySection?: {
+		title: string;
+		description: string;
+	};
+};
+
 // Live2D 看板娘配置 (使用 l2d-widget)
 export type Live2DWidgetConfig = {
 	enable: boolean; // 是否启用 Live2D 看板娘
@@ -549,6 +584,7 @@ export type Live2DWidgetConfig = {
 		items?: { icon?: string; label: string; action: string }[]; // 完全替换默认菜单项
 		extraItems?: { icon?: string; label: string; action: string }[]; // 追加到默认菜单末尾
 		align?: "left" | "right"; // 菜单对齐方式，默认 "right"
+		style?: Record<string, string>; // 工具栏自定义样式
 	};
 	tips?: {
 		enable?: boolean; // 气泡开关，默认 true
@@ -722,7 +758,7 @@ export type FriendsPageConfig = {
 // 音乐播放器配置
 export type MusicPlayerConfig = {
 	// 使用方式：'meting' 或 'local'
-	mode?: "meting" | "local"; // "meting" 使用 Meting API，"local" 使用本地音乐列表
+	mode?: "meting" | "local" | "mix"; // "meting" 仅API，"local" 仅本地，"mix" 合并两者
 
 	// 默认音量 (0-1)
 	volume?: number;

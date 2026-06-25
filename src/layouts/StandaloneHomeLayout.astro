@@ -1,0 +1,217 @@
+---
+import Layout from "./Layout.astro";
+import Navbar from "@/components/layout/Navbar.astro";
+import Footer from "@/components/layout/Footer.astro";
+import BackgroundEffects from "@/components/effects/BackgroundEffects.svelte";
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import { backgroundWallpaper, live2dWidgetConfig, siteConfig } from "@/config";
+import Live2DWidget from "@/components/features/Live2DWidget.astro";
+import SpineModel from "@/components/features/SpineModel.astro";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const backgroundImages = backgroundWallpaper.src;
+let bgImage = "";
+let bgImageMobile = "";
+const desktopPaths: string[] = [];
+const mobilePaths: string[] = [];
+
+if (
+  typeof backgroundImages === "object" &&
+  backgroundImages !== null &&
+  !Array.isArray(backgroundImages) &&
+  "desktop" in backgroundImages
+) {
+  const d = backgroundImages.desktop;
+  const m = backgroundImages.mobile;
+  if (Array.isArray(d)) {
+    desktopPaths.push(...d);
+    bgImage = d[Math.floor(Math.random() * d.length)];
+  } else if (d) {
+    desktopPaths.push(d);
+    bgImage = d;
+  }
+  if (Array.isArray(m)) {
+    mobilePaths.push(...m);
+    bgImageMobile = m[Math.floor(Math.random() * m.length)];
+  } else if (m) {
+    mobilePaths.push(m);
+    bgImageMobile = m;
+  } else {
+    bgImageMobile = bgImage;
+  }
+} else if (typeof backgroundImages === "string") {
+  bgImage = backgroundImages;
+  bgImageMobile = backgroundImages;
+  desktopPaths.push(backgroundImages);
+  mobilePaths.push(backgroundImages);
+}
+
+// Eagerly import all wallpaper images to resolve their URLs for client-side random switching
+const wallpaperModules = import.meta.glob<ImageMetadata>(
+  "/src/assets/images/DesktopWallpaper/*.{avif,webp,jpg,jpeg,png}",
+  { eager: true, import: "default" },
+);
+
+function resolveWallpaperUrl(path: string): string {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("/")) return path;
+  const filename = path.split("/").pop() || path;
+  for (const [globPath, mod] of Object.entries(wallpaperModules)) {
+    if (globPath.endsWith("/" + filename)) {
+      return mod.src;
+    }
+  }
+  return path;
+}
+
+const desktopUrls = desktopPaths.map(resolveWallpaperUrl).filter(Boolean);
+const mobileUrls = (mobilePaths.length > 0 ? mobilePaths : desktopPaths)
+  .map(resolveWallpaperUrl)
+  .filter(Boolean);
+
+const themeColors = ["#a18cd1", "#fbc2eb", "#a1c4fd", "#c2e9fb"];
+
+const stickyNavbar = siteConfig.navbar.stickyNavbar ?? false;
+const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
+
+---
+
+<Layout
+  title={title || siteConfig.title}
+  description={description || siteConfig.description}
+  banner=""
+>
+  <!-- Fixed Background Layer (reference style) -->
+  <div id="bg-wallpaper" class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+    <!-- Background Image -->
+    {bgImageMobile && (
+      <div id="bg-slot-mobile" class="absolute inset-0 block lg:hidden">
+        <ImageWrapper
+          src={bgImageMobile}
+          alt=""
+          class="!absolute !inset-0 !w-full !h-full"
+          loading="eager"
+          fetchpriority="high"
+          widths={[640, 750, 1080]}
+          sizes="100vw"
+        />
+      </div>
+    )}
+    {bgImage && (
+      <div id="bg-slot-desktop" class="absolute inset-0 hidden lg:block">
+        <ImageWrapper
+          src={bgImage}
+          alt=""
+          class="!absolute !inset-0 !w-full !h-full"
+          loading="eager"
+          fetchpriority="high"
+          widths={[1280, 1920, 2560]}
+          sizes="100vw"
+        />
+      </div>
+    )}
+
+    <!-- Frosted Glass Overlay -->
+    <div class="absolute inset-0 z-[1] bg-white/30 dark:bg-slate-900/40 backdrop-blur-md transition-colors duration-1000"></div>
+
+    <!-- Animated Gradient -->
+    <div
+      class="absolute inset-0 z-[2] opacity-60 dark:opacity-20 mix-blend-color transition-opacity duration-1000"
+      style={`background: linear-gradient(-45deg, ${themeColors.join(", ")}); background-size: 400% 400%; animation: gradientMove 15s ease infinite;`}
+    ></div>
+
+    <!-- Glow Orbs -->
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-white/40 dark:bg-indigo-900/20 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-purple-900/30 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+  </div>
+
+  <!-- Navbar -->
+  <div
+    id="top-row"
+    class="z-50 pointer-events-none relative transition-all duration-700 mx-auto"
+    class:list={[
+      stickyNavbar ? "h-18 fixed top-0 left-0 right-0 z-80" : "",
+      navbarWidthFull ? "" : "w-full xl:w-[92vw] max-w-(--page-width) px-0 md:px-4",
+    ]}
+  >
+    <div
+      id="navbar-wrapper"
+      class:list={[
+        "pointer-events-auto transition-all",
+        stickyNavbar ? "" : "sticky top-0",
+      ]}
+    >
+      <Navbar />
+    </div>
+  </div>
+
+  <!-- 桌面端特效：夜间萤火虫，日间樱花 -->
+  <div class="hidden md:block">
+    <BackgroundEffects client:load />
+  </div>
+
+  <!-- Main Content -->
+  <div class="relative z-10 flex-1 flex flex-col">
+    <div class="w-full max-w-6xl mx-auto mt-24 sm:mt-32 px-4 sm:px-6 lg:px-10 pb-10">
+      <slot />
+    </div>
+    <Footer />
+  </div>
+
+  <SpineModel></SpineModel>
+  {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+</Layout>
+
+<script define:vars={{ desktopUrls, mobileUrls }}>
+  if (desktopUrls.length > 1 || mobileUrls.length > 1) {
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    const swapDesktop = () => {
+      const url = pick(desktopUrls);
+      const slot = document.getElementById("bg-slot-desktop");
+      if (slot && url) {
+        slot.innerHTML = '<img src="' + url + '" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager" />';
+      }
+    };
+
+    const swapMobile = () => {
+      const url = pick(mobileUrls);
+      const slot = document.getElementById("bg-slot-mobile");
+      if (slot && url) {
+        slot.innerHTML = '<img src="' + url + '" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager" />';
+      }
+    };
+
+    requestAnimationFrame(() => {
+      swapDesktop();
+      swapMobile();
+    });
+  }
+</script>
+
+<style is:global>
+  /* Neutralize Firefly banner system on homepage */
+  body.is-home {
+    --banner-height: 0px;
+  }
+  body.is-home.enable-banner #top-row {
+    height: auto !important;
+  }
+  body.is-home.enable-banner #wallpaper-wrapper {
+    display: none !important;
+  }
+
+  /* Gradient animation keyframes */
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>

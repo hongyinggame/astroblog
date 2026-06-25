@@ -139,8 +139,8 @@ if (isLocalSrcLogo) {
                     client:load
                 />
                 {musicPlayerConfig.showInNavbar && (
-                    <button aria-label={i18n(I18nKey.music)} class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="music-player-switch">
-                        <Icon name="material-symbols:music-note-rounded" is:inline class="text-[1.25rem]"></Icon>
+                    <button aria-label={i18n(I18nKey.music)} class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 relative" id="music-player-switch">
+                        <Icon name="material-symbols:music-note-rounded" is:inline class="text-[1.25rem] relative z-10" id="music-nav-icon" />
                     </button>
                 )}
                 {hasDisplaySettings && (
@@ -166,64 +166,128 @@ if (isLocalSrcLogo) {
 </div>
 
 <script>
-function loadButtonScript() {
-    let settingBtn = document.getElementById("display-settings-switch");
-    if (settingBtn) {
-        settingBtn.onclick = function () {
-            let settingPanel = document.getElementById("display-setting");
-            if (settingPanel) {
-                settingPanel.classList.toggle("float-panel-closed");
+// 使用事件委托统一处理导航栏所有面板的开关，避免 Swup 替换 DOM 后 onclick 丢失
+(function () {
+    var toggleMap = {
+        "display-settings-switch": "display-setting",
+        "nav-menu-switch": "nav-menu-panel",
+        "music-player-switch": "music-nav-panel",
+        "scheme-switch": "theme-mode-panel",
+    };
+
+    document.addEventListener("click", function (event) {
+        var target = event.target;
+        if (!(target instanceof Node)) return;
+
+        // 遍历所有面板按钮
+        for (var btnId in toggleMap) {
+            var panelId = toggleMap[btnId];
+            var button = document.getElementById(btnId);
+            var panel = document.getElementById(panelId);
+            if (!button || !panel) continue;
+
+            var clickedButton = button.contains(target);
+            var clickedPanel = panel.contains(target);
+
+            if (clickedButton) {
+                // 点击按钮 → 切换对应面板
+                panel.classList.toggle("float-panel-closed");
+                return;
             }
-        };
+
+            if (!panel.classList.contains("float-panel-closed") && !clickedPanel) {
+                // 面板打开中且点击在面板外部 → 关闭
+                panel.classList.add("float-panel-closed");
+            }
+        }
+    });
+})();
+
+// 音乐图标状态同步 - 使用实时 DOM 查找，不缓存按钮引用
+(function () {
+    function getMgr() {
+        return window.__fireflyMusic;
     }
 
-    let menuBtn = document.getElementById("nav-menu-switch");
-    if (menuBtn) {
-        menuBtn.onclick = function () {
-            let menuPanel = document.getElementById("nav-menu-panel");
-            if (menuPanel) {
-                menuPanel.classList.toggle("float-panel-closed");
-            }
-        };
+    function getBtn() {
+        return document.getElementById('music-player-switch');
     }
 
-    let musicBtn = document.getElementById("music-player-switch");
-    if (musicBtn) {
-        musicBtn.onclick = function () {
-            let musicPanel = document.getElementById("music-nav-panel");
-            if (musicPanel) {
-                musicPanel.classList.toggle("float-panel-closed");
-            }
-        };
+    function updateIcon(isPlaying) {
+        var btn = getBtn();
+        if (!btn) return;
+        if (isPlaying) {
+            btn.classList.add('music-playing');
+        } else {
+            btn.classList.remove('music-playing');
+        }
     }
 
-    let themeSwitchBtn = document.getElementById("scheme-switch");
-    if (themeSwitchBtn) {
-        themeSwitchBtn.onclick = function () {
-            let themePanel = document.getElementById("theme-mode-panel");
-            if (themePanel) {
-                themePanel.classList.toggle("float-panel-closed");
-            }
-        };
+    function onPlayStateChange(e) {
+        updateIcon(e.detail.isPlaying);
     }
 
-    document.addEventListener("click", function(event) {
-        const panels = ["display-setting", "nav-menu-panel", "music-nav-panel", "theme-mode-panel"];
-        const buttons = ["display-settings-switch", "nav-menu-switch", "music-player-switch", "scheme-switch"];
+    function onInit() {
+        var m = getMgr();
+        if (m && m.getState().initialized) {
+            updateIcon(m.getState().isPlaying);
+        }
+    }
 
-        panels.forEach((id, index) => {
-            const panel = document.getElementById(id);
-            const button = document.getElementById(buttons[index]);
-            if (panel && button && !panel.classList.contains("float-panel-closed")) {
-                if (event.target instanceof Node && !panel.contains(event.target) && !button.contains(event.target)) {
-                    panel.classList.add("float-panel-closed");
-                }
-            }
+    // 初始状态同步
+    var currentMgr = getMgr();
+    if (currentMgr && currentMgr.getState().initialized) {
+        updateIcon(currentMgr.getState().isPlaying);
+    }
+
+    // 绑定事件
+    window.addEventListener('fm:play-state', onPlayStateChange);
+    window.addEventListener('fm:init', onInit);
+
+    // Swup 导航后重新同步状态（多重延迟确保 DOM 就绪）
+    function syncIconAfterNav() {
+        var btn = getBtn();
+        if (!btn) return;
+        var m = getMgr();
+        if (m && m.getState().initialized) {
+            updateIcon(m.getState().isPlaying);
+        }
+    }
+
+    document.addEventListener('swup:contentReplaced', function () {
+        // 延迟一帧让浏览器索引新 DOM，再延迟 50ms 作为兜底
+        requestAnimationFrame(function () {
+            syncIconAfterNav();
+            setTimeout(syncIconAfterNav, 50);
         });
     });
-}
 
-loadButtonScript();
+    // astro:page-load 作为额外兜底
+    document.addEventListener('astro:page-load', function () {
+        setTimeout(syncIconAfterNav, 100);
+    });
+
+    // Cleanup duplicate Navbar from cross-layout Swup navigation
+    function cleanupDuplicateNavbar() {
+        var navbars = document.querySelectorAll('#navbar');
+        if (navbars.length > 1) {
+            for (var i = 0; i < navbars.length - 1; i++) {
+                var oldNavbar = navbars[i];
+                var oldPanels = oldNavbar.querySelectorAll('.float-panel');
+                oldPanels.forEach(function(p) { p.remove(); });
+                oldNavbar.remove();
+            }
+        }
+        var orphanedPanels = document.querySelectorAll('#music-nav-panel, #display-setting, #nav-menu-panel, #theme-mode-panel');
+        var seen = {};
+        orphanedPanels.forEach(function(p) {
+            var id = p.id;
+            if (seen[id]) { p.remove(); }
+            else { seen[id] = true; }
+        });
+    }
+    document.addEventListener('swup:contentReplaced', cleanupDuplicateNavbar);
+})();
 
 // 为semifull模式添加滚动检测逻辑
 function initSemifullScrollDetection() {
@@ -333,3 +397,24 @@ if (document.readyState === 'loading') {
         </script>
     )
 }
+
+<style is:global>
+#music-player-switch.music-playing #music-nav-icon {
+    color: #a855f7;
+}
+#music-player-switch.music-playing::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: #a855f7;
+    border-right-color: rgba(168,85,247,0.6);
+    animation: discSpin 1s linear infinite;
+}
+@keyframes discSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+

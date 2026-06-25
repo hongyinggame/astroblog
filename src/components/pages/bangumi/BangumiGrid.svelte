@@ -33,7 +33,7 @@ const {
 const isDynamic = $derived(!!fetchConfig);
 
 // 状态
-let activeTab = $state(initialActiveTab || "");
+let activeTab = $state("");
 let loading = $state(isDynamic);
 let error = $state(false);
 let errorTitle = $state("");
@@ -170,6 +170,7 @@ function restoreTabFromHash() {
 }
 
 onMount(async () => {
+	if (!activeTab) activeTab = initialActiveTab || "";
 	restoreTabFromHash();
 	if (isDynamic) {
 		await loadDynamicData();

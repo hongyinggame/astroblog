@@ -82,4 +82,14 @@ export const commentConfig: CommentConfig = {
 		// 获取 Disqus 评论系统
 		shortname: "firefly",
 	},
+
+	//gitalk评论系统配置
+	gitalk: {
+		clientID: "",
+		clientSecret: "",
+		repo: "",
+		owner: "",
+		admin: [""],
+		proxy: "/api/github",
+	},
 };

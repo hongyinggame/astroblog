@@ -269,6 +269,8 @@ const bannerCarouselInterval = Math.max(
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} postSlug={postSlug}>
 
 
+<!-- 从独立页面导航过来时移除 is-standalone 类，防止污染框架页 -->
+<script is:inline>document.body.classList.remove("is-standalone")</script>
 <!-- 为全屏壁纸模式添加body类 -->
 {shouldEnableTransparency && (
 	<script>

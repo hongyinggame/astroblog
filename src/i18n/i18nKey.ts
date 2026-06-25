@@ -61,6 +61,9 @@ enum I18nKey {
 	musicCover = "musicCover",
 	musicNoCover = "musicNoCover",
 	musicAudioPlayer = "musicAudioPlayer",
+	musicListLoop = "musicListLoop",
+	musicSingleLoop = "musicSingleLoop",
+	musicShuffle = "musicShuffle",
 
 	themeColor = "themeColor",
 

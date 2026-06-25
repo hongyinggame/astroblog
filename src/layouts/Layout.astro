@@ -557,6 +557,7 @@ const siteLang = lang.replace("_", "-");
 
     <!-- Font Manager -->
     <FontManager />
+
   </head>
   <body
     class="min-h-screen"
@@ -584,6 +585,7 @@ const siteLang = lang.replace("_", "-");
     {shouldShowTopHighlight && <div class="top-gradient-highlight" />}
     <ConfigCarrier />
     <MusicManager />
+
     <slot />
 
 
@@ -949,6 +951,18 @@ function disableAnimation() {
           return targetHref;
         }
       })();
+
+      // 跨布局导航: 独立页面(说说/杂谈/音乐/首页/相册详情)与框架页面 DOM 结构不同,
+      // Swup 部分替换会造成结构错乱, 必须强制全页刷新
+      const standalonePrefixes = ["/chatter/", "/essays/", "/music/"];
+      const isGalleryAlbum = targetPathname.startsWith("/gallery/") && targetPathname !== "/gallery/";
+      const isStandaloneTarget = targetPathname === "/" || isGalleryAlbum || standalonePrefixes.some((p) => targetPathname.startsWith(p));
+      const currentIsStandalone = document.body.classList.contains("is-standalone");
+      if (currentIsStandalone !== isStandaloneTarget) {
+        window.location.href = targetHref;
+        return;
+      }
+
       const isSamePage = pathsEqual(targetPathname, window.location.pathname);
       if (isSamePage) {
         document.documentElement.classList.remove("is-page-transitioning");
@@ -1048,6 +1062,20 @@ function disableAnimation() {
 
     });
     window.swup.hooks.on("visit:start", (visit: { to: { url: string } }) => {
+      // 跨布局导航检测（覆盖浏览器后退/前进按钮的 popstate 事件）
+      const targetPathname = (() => {
+        try { return new URL(visit.to.url, window.location.href).pathname; }
+        catch { return visit.to.url; }
+      })();
+      const standalonePrefixes = ["/chatter/", "/essays/", "/music/"];
+      const isGalleryAlbum = targetPathname.startsWith("/gallery/") && targetPathname !== "/gallery/";
+      const isStandaloneTarget = targetPathname === "/" || isGalleryAlbum || standalonePrefixes.some((p) => targetPathname.startsWith(p));
+      const currentIsStandalone = document.body.classList.contains("is-standalone");
+      if (currentIsStandalone !== isStandaloneTarget) {
+        window.location.href = visit.to.url;
+        return;
+      }
+
       // Start progress bar
       const progressBar = document.getElementById("progress-bar");
       if (progressBar) {

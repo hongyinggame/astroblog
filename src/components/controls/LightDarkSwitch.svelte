@@ -31,6 +31,7 @@ function switchScheme(newMode: LIGHT_DARK_MODE) {
 	mode = newMode;
 	setTheme(newMode);
 	updateDisplayedMode();
+	window.dispatchEvent(new CustomEvent("theme-change"));
 }
 
 // 更新显示的主题（用于显示当前实际主题）

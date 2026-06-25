@@ -10,8 +10,8 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	// 是否在导航栏显示音乐播放器入口
 	showInNavbar: true,
 
-	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	mode: "meting",
+	// 使用方式："meting" 仅使用 Meting API，"local" 仅使用本地音乐列表，"mix" 合并API与本地
+	mode: "mix",
 
 	// 默认音量 (0-1)
 	volume: 0.7,
@@ -55,6 +55,13 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 				url: "/assets/music/使一颗心免于哀伤-哼唱.mp3",
 				cover: "/assets/music/cover/109951169585655912.webp",
 				lrc: "",
+			},
+			{
+				name: "萤火飞光",
+				artist: "圈9",
+				url: "/assets/music/萤火飞光.mp3",
+				cover: "https://s3.liumingye.cn/files/2026/06/1781732827484.webp",
+				lrc: "/assets/music/lrc/萤火飞光-圈9.lrc",
 			},
 		],
 	},

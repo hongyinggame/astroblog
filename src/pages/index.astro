@@ -1,0 +1,215 @@
+---
+import { getCollection } from "astro:content";
+import type { ImageMetadata } from "astro";
+import StandaloneHomeLayout from "@/layouts/StandaloneHomeLayout.astro";
+import ProfileCard from "@/components/homepage/ProfileCard.astro";
+import SiteDashboard from "@/components/homepage/SiteDashboard.astro";
+import SearchBar from "@/components/homepage/SearchBar.svelte";
+import ThemeToggleBlock from "@/components/homepage/ThemeToggleBlock.svelte";
+import LatestPostsCarousel from "@/components/homepage/LatestPostsCarousel.svelte";
+import LatestChatterCarousel from "@/components/homepage/LatestChatterCarousel.svelte";
+import LyricBar from "@/components/homepage/LyricBar.svelte";
+import HomeCloudPlayer from "@/components/homepage/HomeCloudPlayer.svelte";
+import { galleryConfig, siteConfig } from "@/config";
+import { getAlbumCover, scanAlbumPhotos } from "@/utils/gallery-utils";
+
+// Import content images for resolving relative paths
+const postImageModules = import.meta.glob<ImageMetadata>(
+  "/src/content/posts/**/*.{avif,webp,jpg,jpeg,png}",
+  { eager: true, import: "default" },
+);
+const chatterImageModules = import.meta.glob<ImageMetadata>(
+  "/src/content/chatters/**/*.{avif,webp,jpg,jpeg,png}",
+  { eager: true, import: "default" },
+);
+
+function resolveImage(imagePath: string, imageModules: Record<string, ImageMetadata>): string {
+  if (!imagePath) return "";
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("/")) {
+    return imagePath;
+  }
+  const cleanPath = imagePath.replace(/^\.\//, "");
+  const filename = cleanPath.split("/").pop() || cleanPath;
+  for (const [globPath, mod] of Object.entries(imageModules)) {
+    if (globPath.endsWith("/" + filename)) {
+      return mod.src;
+    }
+  }
+  return imagePath;
+}
+
+// Fetch all posts
+const allPosts = await getCollection("posts", ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+});
+const sortedPosts = allPosts
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => {
+    if (a.data.pinned && !b.data.pinned) return -1;
+    if (!a.data.pinned && b.data.pinned) return 1;
+    return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
+  });
+
+// Fetch all chatters
+const allChatters = await getCollection("chatters", ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+});
+const sortedChatters = allChatters
+  .sort((a, b) => {
+    if (a.data.pinned && !b.data.pinned) return -1;
+    if (!a.data.pinned && b.data.pinned) return 1;
+    return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
+  });
+
+// Fetch all essays
+const allEssays = await getCollection("essays", ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+});
+const sortedEssays = allEssays
+  .sort((a, b) => {
+    if (a.data.pinned && !b.data.pinned) return -1;
+    if (!a.data.pinned && b.data.pinned) return 1;
+    return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
+  });
+
+const topPosts = sortedPosts.slice(0, 5);
+const topChatters = sortedChatters.slice(0, 5);
+
+const postCount = sortedPosts.length;
+const chatterCount = sortedChatters.length;
+const essayCount = sortedEssays.length;
+
+function formatDate(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${day}`;
+}
+
+// Prepare posts for carousel
+const carouselPosts = topPosts.length > 0
+  ? topPosts.map((p) => ({
+      id: p.id,
+      data: { ...p.data, image: resolveImage(p.data.image, postImageModules) },
+      formattedDate: formatDate(p.data.published),
+    }))
+  : [{ id: "none", data: { title: "暂无文章", description: "还没有发布任何文章", published: new Date(), image: "" }, formattedDate: "" }];
+
+const defaultChatterCover = resolveImage("neptune1.jpg", postImageModules);
+
+const carouselChatters = topChatters.length > 0
+  ? topChatters.map((c) => ({
+      id: c.id,
+      data: { ...c.data, image: resolveImage(c.data.image, chatterImageModules) || defaultChatterCover },
+      formattedDate: formatDate(c.data.published),
+    }))
+  : [{ id: "none", data: { title: "暂无说说", description: "还没有发布任何说说", published: new Date(), image: defaultChatterCover }, formattedDate: "" }];
+
+// Prepare all search items (posts + chatters + essays)
+const searchPosts = sortedPosts.map((p) => ({
+  id: p.id,
+  type: "post" as const,
+  title: p.data.title,
+  description: p.data.description,
+  tags: p.data.tags,
+}));
+const searchChatters = sortedChatters.map((c) => ({
+  id: c.id,
+  type: "chatter" as const,
+  title: c.data.title,
+  description: c.data.description,
+}));
+const searchEssays = sortedEssays.map((e) => ({
+  id: e.id,
+  type: "essay" as const,
+  title: e.data.title,
+  description: e.data.description,
+}));
+const allSearchItems = [...searchPosts, ...searchChatters, ...searchEssays];
+
+// Get latest album for photo wall
+const sortedAlbums = [...galleryConfig.albums].sort((a, b) =>
+  new Date(b.date as string).getTime() - new Date(a.date as string).getTime()
+);
+const latestAlbum = sortedAlbums.length > 0 ? (() => {
+  const album = sortedAlbums[0];
+  const photos = scanAlbumPhotos(album.id);
+  const cover = getAlbumCover(album, photos);
+  return { ...album, cover };
+})() : null;
+---
+
+<StandaloneHomeLayout title={siteConfig.title} description={siteConfig.description}>
+  <!-- Search Bar -->
+  <SearchBar items={allSearchItems} client:load />
+
+  <main class="flex flex-col gap-6 w-full mt-6">
+    <!-- Row 1: ProfileCard + CloudPlayer -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+      <div class="col-span-1 lg:col-span-7 flex flex-col">
+        <ProfileCard
+          postCount={postCount}
+          chatterCount={chatterCount}
+          essayCount={essayCount}
+        />
+      </div>
+      <div class="col-span-1 lg:col-span-5 flex flex-col">
+        <HomeCloudPlayer client:load />
+      </div>
+    </div>
+
+    <!-- Lyric Bar -->
+    <div class="w-full">
+      <LyricBar client:load />
+    </div>
+
+    <!-- Row 2: Posts Carousel + PhotoWall + Chatter Carousel + Theme Toggle -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+      <!-- Left: Posts Carousel -->
+      <div class="col-span-1 lg:col-span-4 flex flex-col min-h-[300px]">
+        <LatestPostsCarousel posts={carouselPosts} client:load />
+      </div>
+
+      <!-- Right panel -->
+      <div class="col-span-1 lg:col-span-8 flex flex-col gap-6">
+        <!-- Photo Wall Link -->
+        <a href="/gallery/" class="photo-wall-link w-full rounded-3xl bg-white/40 dark:bg-slate-800/50 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-xl overflow-hidden transition-all duration-700 hover:scale-[1.02] relative group min-h-[200px] sm:min-h-[220px] flex-shrink-0">
+          {latestAlbum?.cover ? (
+            <>
+              <img src={latestAlbum.cover} alt={latestAlbum.name} class="w-full h-full absolute inset-0 object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div class="absolute inset-0 bg-black/50 dark:bg-black/60 group-hover:bg-black/30 transition-colors duration-500"></div>
+              <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 right-6">
+                <h3 class="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 drop-shadow">{latestAlbum.name}</h3>
+                <p class="text-white text-sm sm:text-lg line-clamp-1 drop-shadow">{latestAlbum.description}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div class="absolute inset-0 bg-gradient-to-br from-pink-400/30 to-purple-400/30 dark:from-pink-600/20 dark:to-purple-600/20 group-hover:opacity-70 transition-opacity duration-500"></div>
+              <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 right-6">
+                <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">照片墙</h3>
+                <p class="text-sm sm:text-lg text-slate-700 dark:text-slate-300 line-clamp-1">记录美好瞬间</p>
+              </div>
+            </>
+          )}
+        </a>
+
+        <!-- Bottom row: Chatter + Theme -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full flex-1">
+          <div class="sm:col-span-2 flex flex-col min-h-[200px]">
+            <LatestChatterCarousel chatters={carouselChatters} client:load />
+          </div>
+          <div class="sm:col-span-1 flex flex-col min-h-[120px]">
+            <ThemeToggleBlock client:load />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="w-full">
+      <SiteDashboard />
+    </div>
+  </main>
+</StandaloneHomeLayout>
+

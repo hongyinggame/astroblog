@@ -15,6 +15,13 @@ let isSearching = false;
 let initialized = false;
 let debounceTimer: NodeJS.Timeout;
 
+function getTypeLabel(url: string): string {
+	if (url.includes("/posts/")) return "文章";
+	if (url.includes("/chatter/")) return "说说";
+	if (url.includes("/essays/")) return "杂谈";
+	return "";
+}
+
 // --- Mocks for Dev Mode ---
 const fakeResult: SearchResult[] = [
 	{
@@ -184,10 +191,17 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
                on:click={(e) => handleResultClick(e, item.url)}
                class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
            rounded-xl text-lg px-3 py-2 hover:bg-(--btn-plain-bg-hover) active:bg-(--btn-plain-bg-active)">
-                <div class="transition text-90 inline-flex font-bold group-hover:text-(--primary)">
-                    {@html item.meta.title}
+                <div class="flex items-center gap-2">
+                    {#if getTypeLabel(item.url)}
+                        <span class="text-[0.6rem] font-extrabold px-1.5 py-0.5 rounded text-white bg-(--primary) uppercase tracking-wider flex-shrink-0">
+                            {getTypeLabel(item.url)}
+                        </span>
+                    {/if}
+                    <span class="transition text-90 font-bold group-hover:text-(--primary) truncate">
+                        {@html item.meta.title}
+                    </span>
                     <Icon icon="fa7-solid:chevron-right"
-                          class="transition text-[0.75rem] translate-x-1 my-auto text-(--primary)"></Icon>
+                          class="transition text-[0.75rem] translate-x-1 my-auto text-(--primary) flex-shrink-0"></Icon>
                 </div>
                 {#if item.excerpt.includes('<mark>')}
                     <div class="transition text-sm text-50" style="display: flex; align-items: flex-start; margin-top: 0.1rem">
@@ -240,4 +254,3 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
         overflow-y: auto;
     }
 </style>
-

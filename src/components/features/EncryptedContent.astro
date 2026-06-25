@@ -32,7 +32,7 @@ const labels = {
 >
   <!-- Lock UI -->
   <div id="password-ui" class="flex justify-center py-16 px-4">
-    <div class="card-base flex flex-col items-center gap-3 max-w-100 w-full p-8">
+    <div class="bg-white/60 dark:bg-slate-800/50 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-white/10 shadow-lg flex flex-col items-center gap-3 max-w-100 w-full p-8">
       <Icon name="material-symbols:shield-lock" class="text-8xl text-(--primary)" />
 
       <h2 class="text-lg font-bold text-black/80 dark:text-white/80 m-0">{labels.protected}</h2>
@@ -83,7 +83,6 @@ const labels = {
 
   var encryptedData = container.getAttribute('data-encrypted');
   var slug = container.getAttribute('data-slug');
-  var cacheKey = 'pw:' + slug;
 
   var ui = document.getElementById('password-ui');
   var form = document.getElementById('password-form');
@@ -189,21 +188,10 @@ const labels = {
     if (!pwd) return;
     hideError();
     decrypt(pwd).then(function(html) {
-      sessionStorage.setItem(cacheKey, pwd);
       showContent(html);
     }).catch(function() {
       showError();
     });
   });
-
-  // Try cached password
-  var cached = sessionStorage.getItem(cacheKey);
-  if (cached) {
-    decrypt(cached).then(function(html) {
-      showContent(html);
-    }).catch(function() {
-      sessionStorage.removeItem(cacheKey);
-    });
-  }
 })();
 </script>

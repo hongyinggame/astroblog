@@ -276,7 +276,7 @@ export default defineConfig({
 		mdx(),
 	],
 	markdown: {
-		processor: unified({
+		processor: unified({ gfm: true, smartypants: false,
 			remarkPlugins: [
 				remarkBreaks, // 添加这个插件，将单个换行符转换为 <br>
 				remarkMath,

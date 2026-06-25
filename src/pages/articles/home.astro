@@ -1,0 +1,77 @@
+---
+import Pagination from "@/components/common/Pagination.astro";
+import PostPage from "@/components/layout/PostPage.astro";
+import { siteConfig } from "@/config";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@/utils/content-utils";
+
+const allBlogPosts = await getSortedPosts();
+const pageSize = siteConfig.pagination.postsPerPage;
+const posts = allBlogPosts.slice(0, pageSize);
+const totalPages = Math.ceil(allBlogPosts.length / pageSize);
+
+const page = {
+  data: posts,
+  start: 0,
+  end: posts.length,
+  currentPage: 1,
+  total: allBlogPosts.length,
+  size: pageSize,
+  lastPage: totalPages,
+  url: {
+    current: "/articles/home/",
+    next: totalPages > 1 ? "/articles/" : undefined,
+    prev: undefined,
+    first: undefined,
+    last: totalPages > 1 ? `/articles/${totalPages}/` : undefined,
+  },
+};
+const len = page.data.length;
+---
+
+<MainGridLayout title="文章首页" description="经典 Firefly 风格文章列表">
+  <PostPage page={page} />
+  {
+    page.total > page.size && (
+      <Pagination
+        class="mx-auto onload-animation"
+        page={page}
+        style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+      />
+    )
+  }
+</MainGridLayout>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const responsiveEnabled = true;
+    if (responsiveEnabled) {
+      const deviceType = getDeviceType();
+      document.body.classList.add(`device-${deviceType}`);
+
+      let resizeTimeout: any;
+      window.addEventListener("resize", function () {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function () {
+          const newDeviceType = getDeviceType();
+          const currentDeviceType = document.body.className.match(
+            /device-(mobile|tablet|desktop)/
+          )?.[1];
+
+          if (currentDeviceType !== newDeviceType) {
+            document.body.classList.remove(`device-${currentDeviceType}`);
+            document.body.classList.add(`device-${newDeviceType}`);
+          }
+        }, 250);
+      });
+    }
+  });
+
+  function getDeviceType() {
+    if (typeof window === "undefined") return "desktop";
+    const width = window.innerWidth;
+    if (width < 768) return "mobile";
+    if (width < 1024) return "tablet";
+    return "desktop";
+  }
+</script>

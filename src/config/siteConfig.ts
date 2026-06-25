@@ -88,10 +88,19 @@ export const siteConfig: SiteConfig = {
 		followTheme: false,
 		// 导航栏是否固定在顶部并始终可见
 		stickyNavbar: true,
+		// 导航栏透明模式: 'semi'=半透明 'full'=完全透明 'semifull'=动态透明(顶部透明,滚动后半透明)
+		transparentMode: 'semifull',
+		// 是否开启导航栏毛玻璃模糊效果
+		enableBlur: true,
+		// 导航栏毛玻璃模糊度(px)
+		blur: 5,
 	},
 
 	// 站点开始日期，用于统计运行天数
 	siteStartDate: "2026-06-09",
+
+	// 云音乐歌单ID列表，用于首页音乐播放器
+	cloudMusicIds: ["7550001499", "1972374233", "2081005468"],
 
 	// 站点时区（IANA 时区字符串），用于格式化bangumi、rss里的构建日期时间等等..
 	// 示例："Asia/Shanghai", "UTC", 如果为空，则按照构建服务器的时区进行时区转换
@@ -146,6 +155,10 @@ export const siteConfig: SiteConfig = {
 		bangumi: true,
 		// 相册页面开关
 		gallery: true,
+		// 说说页面开关
+		chatters: true,
+		// 杂谈页面开关
+		essays: true,
 	},
 
 	// 分类导航栏开关，在首页和归档页顶部显示分类快捷导航

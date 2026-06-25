@@ -8,6 +8,7 @@ import { getPostUrlBySlug } from "@/utils/url-utils";
 export let tags: string[] = [];
 export let categories: string[] = [];
 export let sortedPosts: Post[] = [];
+export let urlPrefix: string = "";
 
 const params = new URLSearchParams(window.location.search);
 tags = params.has("tag") ? params.getAll("tag") : [];
@@ -24,9 +25,14 @@ interface Post {
 	};
 }
 
+interface MonthGroup {
+	month: number;
+	posts: Post[];
+}
+
 interface Group {
 	year: number;
-	posts: Post[];
+	months: MonthGroup[];
 }
 
 interface ActiveFilter {
@@ -40,6 +46,7 @@ let primaryFilter: ActiveFilter | null = null;
 let secondaryFilters: ActiveFilter[] = [];
 let filteredPostCount = 0;
 let collapsedYears: Set<number> = new Set();
+let collapsedMonths: Set<string> = new Set();
 
 function toggleYear(year: number) {
 	const willCollapse = !collapsedYears.has(year);
@@ -54,6 +61,32 @@ function toggleYear(year: number) {
 	requestAnimationFrame(() => {
 		const arrow = document.querySelector(
 			`[data-year="${year}"] .archive-arrow`,
+		);
+		if (arrow) {
+			arrow.animate(
+				[
+					{ transform: willCollapse ? "rotate(0deg)" : "rotate(-90deg)" },
+					{ transform: willCollapse ? "rotate(-90deg)" : "rotate(0deg)" },
+				],
+				{ duration: 200, easing: "ease", fill: "forwards" },
+			);
+		}
+	});
+}
+
+function toggleMonth(year: number, month: number) {
+	const key = `${year}-${month}`;
+	const willCollapse = !collapsedMonths.has(key);
+	if (willCollapse) {
+		collapsedMonths.add(key);
+	} else {
+		collapsedMonths.delete(key);
+	}
+	collapsedMonths = new Set(collapsedMonths);
+
+	requestAnimationFrame(() => {
+		const arrow = document.querySelector(
+			`[data-month="${year}-${month}"] .archive-month-arrow`,
 		);
 		if (arrow) {
 			arrow.animate(
@@ -146,21 +179,31 @@ onMount(async () => {
 
 	filteredPostCount = filteredPosts.length;
 
+	// Group by year, then by month
 	const grouped = filteredPosts.reduce(
 		(acc, post) => {
 			const year = post.data.published.getFullYear();
+			const month = post.data.published.getMonth() + 1;
 			if (!acc[year]) {
-				acc[year] = [];
+				acc[year] = {};
 			}
-			acc[year].push(post);
+			if (!acc[year][month]) {
+				acc[year][month] = [];
+			}
+			acc[year][month].push(post);
 			return acc;
 		},
-		{} as Record<number, Post[]>,
+		{} as Record<number, Record<number, Post[]>>,
 	);
 
-	const groupedPostsArray = Object.keys(grouped).map((yearStr) => ({
-		year: Number.parseInt(yearStr, 10),
-		posts: grouped[Number.parseInt(yearStr, 10)],
+	const groupedPostsArray: Group[] = Object.entries(grouped).map(([yearStr, months]) => ({
+		year: Number(yearStr),
+		months: Object.entries(months)
+			.map(([monthStr, posts]) => ({
+				month: Number(monthStr),
+				posts,
+			}))
+			.sort((a, b) => b.month - a.month),
 	}));
 
 	groupedPostsArray.sort((a, b) => b.year - a.year);
@@ -196,7 +239,7 @@ onMount(async () => {
 });
 </script>
 
-<div class="card-base px-8 py-6">
+<div class="bg-white/60 dark:bg-slate-800/50 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-white/10 shadow-lg px-8 py-6">
 	{#if primaryFilter}
 		<div class="mb-5">
 			<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
@@ -217,6 +260,7 @@ onMount(async () => {
 	{/if}
 
 	{#each groups as group}
+		{@const totalPosts = group.months.reduce((sum, m) => sum + m.posts.length, 0)}
 		<div data-year={group.year}>
 			<button
 				class="flex flex-row w-full items-center h-15 cursor-pointer rounded-lg
@@ -236,7 +280,7 @@ onMount(async () => {
 				</div>
 				<div class="w-[70%] md:w-[80%] transition text-left text-50 flex items-center gap-2
 				            group-hover/yr:text-(--primary)">
-					{group.posts.length} {i18n(group.posts.length === 1 ? I18nKey.postCount : I18nKey.postsCount)}
+					{totalPosts} {i18n(totalPosts === 1 ? I18nKey.postCount : I18nKey.postsCount)}
 					<span class="archive-arrow" style={collapsedYears.has(group.year) ? 'transform: rotate(-90deg)' : ''}>
 						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
 							<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -246,57 +290,86 @@ onMount(async () => {
 			</button>
 
 			{#if !collapsedYears.has(group.year)}
-			{#each group.posts as post}
-				<a
-						href={getPostUrlBySlug(post.id)}
-						aria-label={post.data.title}
-						class="group btn-plain block! h-10 w-full rounded-lg hover:text-[initial]"
-				>
-					<div class="flex flex-row justify-start items-center h-full">
-						<!-- date -->
-						<div class="w-[15%] md:w-[10%] transition text-sm text-right text-50">
-							{formatDate(post.data.published)}
-						</div>
+				{#each group.months as monthGroup}
+					{@const monthKey = `${group.year}-${monthGroup.month}`}
+					<div data-month={monthKey}>
+						<button
+							class="flex flex-row w-full items-center h-11 cursor-pointer rounded-lg
+							       hover:bg-(--btn-plain-bg-hover) transition-colors group/mo"
+							on:click={() => toggleMonth(group.year, monthGroup.month)}
+							aria-expanded={!collapsedMonths.has(monthKey)}
+						>
+							<div class="w-[15%] md:w-[10%]"></div>
+							<div class="w-[15%] md:w-[10%] flex justify-center">
+								<div class="h-2 w-2 rounded-full bg-(--primary)/50 mx-auto"></div>
+							</div>
+							<div class="w-[70%] md:w-[80%] transition text-left text-sm text-white/80 flex items-center gap-2
+							            group-hover/mo:text-(--primary)">
+								{monthGroup.month}月
+								<span class="text-xs text-white/50">({monthGroup.posts.length})</span>
+								<span class="archive-month-arrow inline-flex" style={collapsedMonths.has(monthKey) ? 'transform: rotate(-90deg)' : ''}>
+									<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+										<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</span>
+							</div>
+						</button>
 
-						<!-- dot and line -->
-						<div class="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">
-							<div
-									class="transition-all mx-auto w-1 h-1 rounded group-hover:h-5
+						{#if !collapsedMonths.has(monthKey)}
+							{#each monthGroup.posts as post}
+								<a
+										href={urlPrefix ? `/${urlPrefix}/${post.id}/` : getPostUrlBySlug(post.id)}
+										aria-label={post.data.title}
+										class="group btn-plain block! h-10 w-full rounded-lg hover:text-[initial]"
+								>
+									<div class="flex flex-row justify-start items-center h-full">
+										<!-- date -->
+										<div class="w-[15%] md:w-[10%] transition text-sm text-right text-50">
+											{formatDate(post.data.published)}
+										</div>
+
+										<!-- dot and line -->
+										<div class="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">
+											<div
+													class="transition-all mx-auto w-1 h-1 rounded group-hover:h-5
                        bg-[oklch(0.5_0.05_var(--hue))] group-hover:bg-(--primary)
                        outline outline-4 z-50
-                       outline-(--card-bg)
+                       outline-white/60 dark:outline-slate-800/50
                        group-hover:outline-(--btn-plain-bg-hover)
                        group-active:outline-(--btn-plain-bg-active)"
-							></div>
-						</div>
+											></div>
+										</div>
 
-						<!-- post title -->
-						<div
-								class="w-[70%] md:max-w-[65%] md:w-[65%] text-left font-bold
+										<!-- post title -->
+										<div
+												class="w-[70%] md:max-w-[65%] md:w-[65%] text-left font-bold
                      group-hover:translate-x-1 transition-all group-hover:text-(--primary)
                      text-75 pr-8 whitespace-nowrap text-ellipsis overflow-hidden flex items-center gap-2"
-						>
-							{#if post.data.category}
-								<span class="shrink-0 inline-block text-xs font-medium px-1.5 py-0.5 rounded
-								             bg-[oklch(0.95_0.025_var(--hue))] dark:bg-[oklch(0.25_0.025_var(--hue))]
-								             text-(--primary) group-hover:bg-(--primary) group-hover:text-white!
-								             transition-colors">
-									{post.data.category}
-								</span>
-							{/if}
-							<span class="truncate">{post.data.title}</span>
-						</div>
+										>
+											{#if post.data.category}
+												<span class="shrink-0 inline-block text-xs font-medium px-1.5 py-0.5 rounded
+												             bg-[oklch(0.95_0.025_var(--hue))] dark:bg-[oklch(0.25_0.025_var(--hue))]
+												             text-(--primary) group-hover:bg-(--primary) group-hover:text-white!
+												             transition-colors">
+													{post.data.category}
+												</span>
+											{/if}
+											<span class="truncate">{post.data.title}</span>
+										</div>
 
-						<!-- tag list -->
-						<div
-								class="hidden md:block md:w-[15%] text-left text-sm transition
+										<!-- tag list -->
+										<div
+												class="hidden md:block md:w-[15%] text-left text-sm transition
                      whitespace-nowrap text-ellipsis overflow-hidden text-30"
-						>
-							{formatTag(post.data.tags)}
-						</div>
+										>
+											{formatTag(post.data.tags)}
+										</div>
+									</div>
+								</a>
+							{/each}
+						{/if}
 					</div>
-				</a>
-			{/each}
+				{/each}
 			{/if}
 		</div>
 	{/each}
@@ -304,6 +377,9 @@ onMount(async () => {
 
 <style>
 	.archive-arrow {
+		display: inline-flex;
+	}
+	.archive-month-arrow {
 		display: inline-flex;
 	}
 </style>

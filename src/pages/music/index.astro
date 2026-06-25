@@ -1,0 +1,127 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Navbar from "@/components/layout/Navbar.astro";
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import MusicPage from "@/components/features/MusicPage.svelte";
+import BackgroundEffects from "@/components/effects/BackgroundEffects.svelte";
+import { backgroundWallpaper, live2dWidgetConfig, siteConfig } from "@/config";
+import Live2DWidget from "@/components/features/Live2DWidget.astro";
+import SpineModel from "@/components/features/SpineModel.astro";
+
+// Background wallpaper
+const backgroundImages = backgroundWallpaper.src;
+let bgImage = "";
+let bgImageMobile = "";
+if (
+  typeof backgroundImages === "object" &&
+  backgroundImages !== null &&
+  !Array.isArray(backgroundImages) &&
+  "desktop" in backgroundImages
+) {
+  const d = backgroundImages.desktop;
+  const m = backgroundImages.mobile;
+  if (Array.isArray(d)) bgImage = d[Math.floor(Math.random() * d.length)];
+  else if (d) bgImage = d;
+  if (Array.isArray(m)) bgImageMobile = m[Math.floor(Math.random() * m.length)];
+  else if (m) bgImageMobile = m;
+  else bgImageMobile = bgImage;
+} else if (typeof backgroundImages === "string") {
+  bgImage = backgroundImages;
+  bgImageMobile = backgroundImages;
+}
+
+const themeColors = ["#a18cd1", "#fbc2eb", "#a1c4fd", "#c2e9fb"];
+
+const stickyNavbar = siteConfig.navbar.stickyNavbar ?? false;
+const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
+
+---
+
+<Layout title="音乐馆" description="云端乐律 - 在代码的缝隙中寻找灵魂的共鸣">
+  <script is:inline>document.body.classList.add("is-standalone")</script>
+  <div id="banner-overlay-container" style="display:none"></div>
+  <div id="banner-dim-container" style="display:none"></div>
+  <div id="left-sidebar-dynamic" style="display:none"></div>
+  <div id="swup-container">
+  <!-- Fixed Background Layer -->
+  <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+    {bgImageMobile && (
+      <div class="absolute inset-0 block lg:hidden">
+        <ImageWrapper
+          src={bgImageMobile}
+          alt=""
+          class="!absolute !inset-0 !w-full !h-full"
+          loading="eager"
+          fetchpriority="high"
+          widths={[640, 750, 1080]}
+          sizes="100vw"
+        />
+      </div>
+    )}
+    {bgImage && (
+      <div class="absolute inset-0 hidden lg:block">
+        <ImageWrapper
+          src={bgImage}
+          alt=""
+          class="!absolute !inset-0 !w-full !h-full"
+          loading="eager"
+          fetchpriority="high"
+          widths={[1280, 1920, 2560]}
+          sizes="100vw"
+        />
+      </div>
+    )}
+
+    <!-- Frosted Glass Overlay -->
+    <div class="absolute inset-0 z-[1] bg-white/30 dark:bg-slate-900/40 backdrop-blur-md transition-colors duration-1000"></div>
+
+    <!-- Animated Gradient -->
+    <div
+      class="absolute inset-0 z-[2] opacity-60 dark:opacity-20 mix-blend-color transition-opacity duration-1000"
+      style={`background: linear-gradient(-45deg, ${themeColors.join(", ")}); background-size: 400% 400%; animation: musicGradientMove 15s ease infinite;`}
+    ></div>
+
+    <!-- Glow Orbs -->
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-white/40 dark:bg-indigo-900/20 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-purple-900/30 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+  </div>
+
+  <!-- 萤火虫/樱花特效 -->
+  <BackgroundEffects client:load />
+
+    <!-- Navbar -->
+  <div
+    id="top-row"
+    class="z-50 pointer-events-none relative transition-all duration-700 mx-auto"
+    class:list={[
+      stickyNavbar ? "h-18 fixed top-0 left-0 right-0 z-80" : "",
+      navbarWidthFull ? "" : "w-full xl:w-[92vw] max-w-(--page-width) px-0 md:px-4",
+    ]}
+  >
+    <div
+      id="navbar-wrapper"
+      class:list={[
+        "pointer-events-auto transition-all",
+        stickyNavbar ? "" : "sticky top-0",
+      ]}
+    >
+      <Navbar />
+    </div>
+  </div>
+
+  <MusicPage client:load />
+
+  <SpineModel></SpineModel>
+  {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  </div>
+  <div id="right-sidebar-dynamic" style="display:none"></div>
+  <div id="floating-toc-wrapper" style="display:none"></div>
+</Layout>
+
+<style is:global>
+  @keyframes musicGradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>

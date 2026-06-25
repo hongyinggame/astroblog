@@ -102,8 +102,15 @@ onMount(() => {
 	}
 });
 
-let debounceTimer: NodeJS.Timeout;
-const handleInput = () => {
+function getTypeLabel(url: string): string {
+		if (url.includes('/posts/')) return '文章';
+		if (url.includes('/chatter/')) return '说说';
+		if (url.includes('/essays/')) return '杂谈';
+		return '';
+	}
+
+	let debounceTimer: NodeJS.Timeout;
+	const handleInput = () => {
 	clearTimeout(debounceTimer);
 	debounceTimer = setTimeout(() => {
 		search();
@@ -158,9 +165,16 @@ const handleInput = () => {
                 {#each results as result}
                     <div class="card-base p-6 block rounded-(--radius-large)">
                         <a href={result.url} class="block group">
-                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-90 group-hover:text-(--primary) transition-colors">
-                                {@html result.meta.title}
-                            </h5>
+                            <div class="flex items-center gap-2 mb-2">
+                                {#if getTypeLabel(result.url)}
+                                    <span class="text-[0.6rem] font-extrabold px-1.5 py-0.5 rounded text-white bg-(--primary) uppercase tracking-wider flex-shrink-0">
+                                        {getTypeLabel(result.url)}
+                                    </span>
+                                {/if}
+                                <h5 class="text-2xl font-bold tracking-tight text-90 group-hover:text-(--primary) transition-colors">
+                                    {@html result.meta.title}
+                                </h5>
+                            </div>
                             <p class="font-normal text-75">
                                 {@html result.excerpt}
                             </p>

@@ -175,6 +175,11 @@ export const live2dWidgetConfig: Live2DWidgetConfig = {
 				action: "scrollToTop",
 			},
 			{
+				icon: "mdi:theme-light-dark",
+				label: "切换主题",
+				action: "toggleTheme",
+			},
+			{
 				icon: "mdi:bed",
 				label: "休眠",
 				action: "sleep",
@@ -192,6 +197,8 @@ export const live2dWidgetConfig: Live2DWidgetConfig = {
 		],
 		// 菜单对齐方式
 		align: "right" as const,
+		// 工具栏靠近看板娘
+		style: { marginBottom: "-30px", fontSize: "16px" },
 	},
 	// 提示气泡配置
 	tips: {

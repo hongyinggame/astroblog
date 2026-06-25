@@ -473,7 +473,7 @@ function showBannerMode(animate = false) {
 	if (navbar) {
 		// 获取导航栏透明模式配置（banner模式）
 		const transparentMode =
-			backgroundWallpaper.common?.navbar?.transparentMode || "semi";
+			siteConfig.navbar.transparentMode || backgroundWallpaper.common?.navbar?.transparentMode || "semi";
 		navbar.setAttribute("data-transparent-mode", transparentMode);
 
 		// 重新初始化半透明模式滚动检测（如果需要）
@@ -549,7 +549,7 @@ function showFullscreenMode(animate = false) {
 	const navbar = document.getElementById("navbar");
 	if (navbar) {
 		const transparentMode =
-			backgroundWallpaper.common?.navbar?.transparentMode || "semi";
+			siteConfig.navbar.transparentMode || backgroundWallpaper.common?.navbar?.transparentMode || "semi";
 		navbar.setAttribute("data-transparent-mode", transparentMode);
 
 		if (
@@ -638,15 +638,15 @@ function updateNavbarTransparency(mode: WALLPAPER_MODE) {
 	} else if (mode === WALLPAPER_FULLSCREEN) {
 		// 全屏壁纸模式：使用 fullscreen 配置的透明模式和模糊效果
 		transparentMode =
-			backgroundWallpaper.common?.navbar?.transparentMode || "semi";
-		enableBlur = backgroundWallpaper.common?.navbar?.enableBlur ?? true;
-		blurAmount = backgroundWallpaper.common?.navbar?.blur ?? 20;
+			siteConfig.navbar.transparentMode || backgroundWallpaper.common?.navbar?.transparentMode || "semi";
+		enableBlur = siteConfig.navbar.enableBlur ?? backgroundWallpaper.common?.navbar?.enableBlur ?? true;
+		blurAmount = siteConfig.navbar.blur ?? backgroundWallpaper.common?.navbar?.blur ?? 20;
 	} else {
 		// Banner模式：使用配置的透明模式和模糊效果
 		transparentMode =
-			backgroundWallpaper.common?.navbar?.transparentMode || "semi";
-		enableBlur = backgroundWallpaper.common?.navbar?.enableBlur ?? true;
-		blurAmount = backgroundWallpaper.common?.navbar?.blur ?? 20;
+			siteConfig.navbar.transparentMode || backgroundWallpaper.common?.navbar?.transparentMode || "semi";
+		enableBlur = siteConfig.navbar.enableBlur ?? backgroundWallpaper.common?.navbar?.enableBlur ?? true;
+		blurAmount = siteConfig.navbar.blur ?? backgroundWallpaper.common?.navbar?.blur ?? 20;
 	}
 
 	// 更新导航栏的透明模式属性

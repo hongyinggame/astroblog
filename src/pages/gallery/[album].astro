@@ -1,173 +1,667 @@
 ---
 import { Icon } from "astro-icon/components";
-import EncryptedContent from "@/components/features/EncryptedContent.astro";
 import PhotoCard from "@/components/pages/gallery/PhotoCard.astro";
-import { galleryConfig, siteConfig } from "@/config";
+import Layout from "@/layouts/Layout.astro";
+import Navbar from "@/components/layout/Navbar.astro";
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import BackgroundEffects from "@/components/effects/BackgroundEffects.svelte";
+import Live2DWidget from "@/components/features/Live2DWidget.astro";
+import SpineModel from "@/components/features/SpineModel.astro";
+import { backgroundWallpaper, galleryConfig, live2dWidgetConfig, siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
-import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import { getAlbumCover, scanAlbumPhotos } from "@/utils/gallery-utils";
 import { getLqipProps } from "@/utils/lqip-utils";
-import { url } from "@/utils/url-utils";
+import { encryptContent } from "@/utils/crypto-utils";
 
-// 检查页面是否启用
 if (!siteConfig.pages.gallery) {
-	return Astro.redirect("/404/");
+  return Astro.redirect("/404/");
 }
 
 export function getStaticPaths() {
-	return galleryConfig.albums.map((album) => ({
-		params: { album: album.id },
-	}));
+  return galleryConfig.albums.map((album) => ({
+    params: { album: album.id },
+  }));
 }
 
 const { album: albumId } = Astro.params;
 const albumMeta = galleryConfig.albums.find((a) => a.id === albumId);
 
 if (!albumMeta) {
-	return Astro.redirect("/404/");
+  return Astro.redirect("/404/");
 }
 
 const photos = scanAlbumPhotos(albumMeta.id);
-const cover = getAlbumCover(albumMeta, photos);
 const columnWidth = galleryConfig.columnWidth || 240;
+const isEncrypted = !!albumMeta.password;
 
-// LQIP 渐变占位
-const coverLqipProps = cover
-	? getLqipProps(cover, undefined, true)
-	: { style: "" };
+const albumIndex = galleryConfig.albums.findIndex((a) => a.id === albumId);
+const prevAlbum = albumIndex > 0 ? galleryConfig.albums[albumIndex - 1] : null;
+const nextAlbum = albumIndex < galleryConfig.albums.length - 1 ? galleryConfig.albums[albumIndex + 1] : null;
+
+const cover = getAlbumCover(albumMeta, photos);
+const coverLqipProps = cover ? getLqipProps(cover, undefined, true) : { style: "" };
+
+let encryptedGridData = "";
+if (isEncrypted) {
+  const gridHtml = `<div class="gallery-masonry" style="column-count:2;column-gap:0.75rem;--col-width:${columnWidth}px">${
+    photos.map((photo) => {
+      const lp = getLqipProps(photo, undefined, true);
+      return `<div class="gallery-photo-card break-inside-avoid mb-3">
+        <div data-fancybox="gallery-${albumMeta.id}" data-src="${photo}" data-type="image"
+          class="block rounded-xl overflow-hidden relative group cursor-pointer">
+          <div class="lqip-placeholder absolute inset-0 pointer-events-none" style="${lp.style};z-index:-1" aria-hidden="true"></div>
+          <img src="${photo}" alt="" decoding="async"
+            class="w-full h-auto object-cover opacity-0 transition-all duration-500 ease-out group-hover:scale-105"
+            onload="this.classList.remove('opacity-0')" onerror="this.classList.remove('opacity-0')" />
+        </div>
+      </div>`;
+    }).join("")
+  }</div>`;
+  encryptedGridData = encryptContent(gridHtml, albumMeta.password!, albumMeta.id);
+}
+
+const backgroundImages = backgroundWallpaper.src;
+let bgImage = "";
+let bgImageMobile = "";
+if (typeof backgroundImages === "object" && backgroundImages !== null && !Array.isArray(backgroundImages) && "desktop" in backgroundImages) {
+  const d = backgroundImages.desktop;
+  const m = backgroundImages.mobile;
+  if (Array.isArray(d)) bgImage = d[Math.floor(Math.random() * d.length)];
+  else if (d) bgImage = d;
+  if (Array.isArray(m)) bgImageMobile = m[Math.floor(Math.random() * m.length)];
+  else if (m) bgImageMobile = m;
+  else bgImageMobile = bgImage;
+} else if (typeof backgroundImages === "string") {
+  bgImage = backgroundImages;
+  bgImageMobile = backgroundImages;
+}
+
+const themeColors = ["#a18cd1", "#fbc2eb", "#a1c4fd", "#c2e9fb", "#ffecd2", "#fcb69f", "#ff9a9e", "#fad0c4"];
+
+const stickyNavbar = siteConfig.navbar.stickyNavbar ?? false;
+const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 ---
 
-<MainGridLayout title={albumMeta.name} description={albumMeta.description || ""}>
-  <!-- 相册封面横幅 -->
-  <div class="w-full rounded-(--radius-large) overflow-hidden relative">
-    {cover ? (
-      <div class="relative w-full aspect-[3/1] min-h-[200px] max-h-[360px] overflow-hidden">
-        <div class="lqip-placeholder absolute inset-0 pointer-events-none" style={coverLqipProps.style} aria-hidden="true"></div>
-        <img
-          src={cover}
-          alt={albumMeta.name}
-          class="w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-out"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <!-- 返回按钮 -->
-        <a
-          href={url("/gallery/")}
-          class="absolute top-4 left-4 inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white bg-black/30 hover:bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-lg transition-colors"
-        >
-          <Icon name="material-symbols:arrow-back" class="text-base" />
-          {i18n(I18nKey.galleryBackToAlbums)}
-        </a>
-        <!-- 封面上的信息 -->
-        <div class="absolute bottom-0 left-0 right-0 p-6">
-          <div class="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-lg">
-            {albumMeta.name}
-          </div>
-          {albumMeta.description && (
-            <p class="text-sm text-white/75 leading-relaxed mb-2 max-w-2xl line-clamp-2">
-              {albumMeta.description}
-            </p>
-          )}
-          <div class="flex items-center gap-4 text-sm text-white/80 flex-wrap">
-            {albumMeta.date && (
-              <span class="inline-flex items-center gap-1">
-                <Icon name="material-symbols:calendar-today" class="text-sm" />
-                {albumMeta.date}
-              </span>
-            )}
-            {albumMeta.location && (
-              <span class="inline-flex items-center gap-1">
-                <Icon name="material-symbols:location-on" class="text-sm" />
-                {albumMeta.location}
-              </span>
-            )}
-            <span class="inline-flex items-center gap-1">
-              <Icon name="material-symbols:photo-library" class="text-sm" />
-              {photos.length} {i18n(I18nKey.galleryPhotos)}
-            </span>
-          </div>
-          {albumMeta.tags && albumMeta.tags.length > 0 && (
-            <div class="flex flex-wrap gap-1.5 mt-2.5">
-              {albumMeta.tags.map((tag) => (
-                <span class="text-xs px-2 py-0.5 rounded bg-white/20 text-white/90 backdrop-blur-sm">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    ) : (
-      <div class="card-base px-6 py-4">
-        <a
-          href={url("/gallery/")}
-          class="inline-flex items-center gap-1 text-sm text-(--primary) hover:underline mb-3"
-        >
-          <Icon name="material-symbols:arrow-back" class="text-base" />
-          {i18n(I18nKey.galleryBackToAlbums)}
-        </a>
-        <div class="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-          {albumMeta.name}
-        </div>
-        <div class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400 mt-2 flex-wrap">
-          {albumMeta.date && (
-            <span class="inline-flex items-center gap-1">
-              <Icon name="material-symbols:calendar-today" class="text-sm" />
-              {albumMeta.date}
-            </span>
-          )}
-          {albumMeta.location && (
-            <span class="inline-flex items-center gap-1">
-              <Icon name="material-symbols:location-on" class="text-sm" />
-              {albumMeta.location}
-            </span>
-          )}
-          <span>{photos.length} {i18n(I18nKey.galleryPhotos)}</span>
-        </div>
+<Layout title={albumMeta.name} description={albumMeta.description || ""}>
+  <script is:inline>document.body.classList.add("is-standalone")</script>
+  <div id="banner-overlay-container" style="display:none"></div>
+  <div id="banner-dim-container" style="display:none"></div>
+  <div id="left-sidebar-dynamic" style="display:none"></div>
+  <div id="swup-container">
+
+  <!-- Background -->
+  <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+    {bgImageMobile && (
+      <div class="absolute inset-0 block lg:hidden">
+        <ImageWrapper src={bgImageMobile} alt="" class="!absolute !inset-0 !w-full !h-full" loading="eager" fetchpriority="high" widths={[640, 750, 1080]} sizes="100vw" />
       </div>
     )}
+    {bgImage && (
+      <div class="absolute inset-0 hidden lg:block">
+        <ImageWrapper src={bgImage} alt="" class="!absolute !inset-0 !w-full !h-full" loading="eager" fetchpriority="high" widths={[1280, 1920, 2560]} sizes="100vw" />
+      </div>
+    )}
+    <div class="absolute inset-0 z-[1] bg-white/30 dark:bg-slate-900/40 backdrop-blur-md transition-colors duration-1000"></div>
+    <div class="absolute inset-0 z-[2] opacity-60 dark:opacity-20 mix-blend-color transition-opacity duration-1000"
+      style={`background: linear-gradient(-45deg, ${themeColors.join(", ")}); background-size: 400% 400%; animation: galleryGradientMove 15s ease infinite;`}></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-white/40 dark:bg-indigo-900/20 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-purple-900/30 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
   </div>
 
-  <!-- 瀑布流照片网格 -->
-  <div class="w-full rounded-(--radius-large) overflow-hidden relative mt-4">
-    <div class="card-base z-10 px-6 py-6 relative w-full">
-      {photos.length > 0 ? (
-        albumMeta.password ? (
-          <EncryptedContent password={albumMeta.password} slug={albumMeta.id} hint={albumMeta.passwordHint}>
-            <div
-              class="gallery-masonry"
-              style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}
-            >
-              {photos.map((photo) => (
-                <PhotoCard src={photo} albumId={albumMeta.id} />
-              ))}
-            </div>
-          </EncryptedContent>
-        ) : (
-          <div
-            class="gallery-masonry"
-            style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}
-          >
-            {photos.map((photo) => (
-              <PhotoCard src={photo} albumId={albumMeta.id} />
-            ))}
-          </div>
-        )
-      ) : (
-        <div class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500">
-          <Icon name="material-symbols:photo-library" class="text-6xl mb-4 opacity-50" />
-          <p class="text-lg">{i18n(I18nKey.galleryNoAlbums)}</p>
-        </div>
-      )}
+  <!-- Navbar -->
+  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 mx-auto"
+    class:list={[stickyNavbar ? "h-18 fixed top-0 left-0 right-0 z-80" : "", navbarWidthFull ? "" : "w-full xl:w-[92vw] max-w-(--page-width) px-0 md:px-4"]}>
+    <div id="navbar-wrapper" class:list={["pointer-events-auto transition-all", stickyNavbar ? "" : "sticky top-0"]}>
+      <Navbar />
     </div>
   </div>
 
-  <style is:global>
-    @media (min-width: 640px) {
-      .gallery-masonry {
-        column-width: var(--col-width, 240px) !important;
-        column-count: auto !important;
-      }
+  <div class="hidden md:block"><BackgroundEffects client:load /></div>
+
+  <main class="relative z-10 min-h-screen pt-24 md:pt-28 pb-10">
+    <div class="max-w-6xl mx-auto px-4">
+
+      <!-- Nav pills -->
+      <div class="flex items-center gap-2 mb-8 flex-wrap">
+        <a href="/gallery/" class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl font-medium no-underline shrink-0
+          text-(--btn-content) bg-[color-mix(in_srgb,var(--btn-content)_6%,transparent)]
+          shadow-md shadow-(--primary)/20 hover:text-white hover:bg-(--primary) hover:shadow-lg hover:shadow-(--primary)/30 transition-all duration-200 ease-out">
+          <Icon name="material-symbols:arrow-back" is:inline class="text-lg" />
+        </a>
+        <span class="inline-flex items-center text-sm px-4 py-1.5 rounded-xl font-medium whitespace-nowrap bg-(--primary) text-white">
+          {albumMeta.name}
+        </span>
+        {isEncrypted && (
+          <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400">
+            <Icon name="material-symbols:lock" class="text-sm" />加密
+          </span>
+        )}
+        <button type="button" id="gallery-layout-toggle" title="散乱展示"
+          class:list={["inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl font-medium cursor-pointer border-none text-(--btn-content) bg-[color-mix(in_srgb,var(--btn-content)_6%,transparent)] shadow-md shadow-(--primary)/20 hover:text-white hover:bg-(--primary) hover:shadow-lg hover:shadow-(--primary)/30 transition-all duration-200 ease-out", { hidden: isEncrypted }]}>
+          <Icon name="material-symbols:auto-awesome" is:inline class="text-base" />
+        </button>
+        <button type="button" id="gallery-dim-toggle" title="暗光模式"
+          class:list={["inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl font-medium cursor-pointer border-none text-(--btn-content) bg-[color-mix(in_srgb,var(--btn-content)_6%,transparent)] shadow-md shadow-(--primary)/20 hover:text-white hover:bg-(--primary) hover:shadow-lg hover:shadow-(--primary)/30 transition-all duration-200 ease-out", { hidden: isEncrypted }]}>
+          <Icon name="material-symbols:routine" is:inline class="text-base" />
+        </button>
+      </div>
+
+      {isEncrypted ? (
+        <!-- ============ 加密相册：独立布局 ============ -->
+        <div id="encrypted-album-root" data-encrypted={encryptedGridData} data-slug={albumMeta.id}>
+
+          <!-- 锁屏界面 -->
+          <div id="lock-screen" class="flex items-center justify-center min-h-[70vh] py-8">
+            <div class="w-full max-w-lg">
+              <!-- 主卡片 -->
+              <div class="relative bg-white/60 dark:bg-slate-800/50 backdrop-blur-2xl rounded-3xl
+                border border-white/40 dark:border-white/10
+                shadow-2xl shadow-(--primary)/5
+                px-8 md:px-12 pt-12 pb-10
+                overflow-hidden">
+
+                <!-- 顶部渐变装饰条 -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-(--primary) via-pink-400 to-amber-400"></div>
+
+                <!-- 锁图标 + 脉冲光环 -->
+                <div class="flex justify-center mb-8">
+                  <div class="relative">
+                    <div class="absolute inset-0 w-24 h-24 rounded-full bg-(--primary)/20 animate-[vaultPulse_2.5s_ease-in-out_infinite]"></div>
+                    <div class="relative w-24 h-24 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur-md
+                      border-2 border-(--primary)/30 dark:border-(--primary)/20
+                      shadow-lg shadow-(--primary)/15
+                      flex items-center justify-center z-10">
+                      <Icon name="material-symbols:lock" class="text-4xl text-(--primary)" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 标题 -->
+                <h1 class="text-2xl md:text-3xl font-bold text-center mb-3
+                  text-black/80 dark:text-white/85
+                  bg-gradient-to-r from-(--primary) via-pink-400 to-amber-400 bg-clip-text">
+                  {albumMeta.name}
+                </h1>
+
+                <!-- 描述 -->
+                {albumMeta.description && (
+                  <p class="text-sm text-center text-black/45 dark:text-white/35 leading-relaxed mb-5 max-w-xs mx-auto">
+                    {albumMeta.description}
+                  </p>
+                )}
+
+                <!-- 元信息 -->
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+                  {albumMeta.date && (
+                    <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full
+                      bg-(--primary)/8 text-(--primary)/60">
+                      <Icon name="material-symbols:calendar-today" class="text-sm" />{albumMeta.date}
+                    </span>
+                  )}
+                  {albumMeta.location && (
+                    <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full
+                      bg-pink-500/8 text-pink-500/60">
+                      <Icon name="material-symbols:location-on" class="text-sm" />{albumMeta.location}
+                    </span>
+                  )}
+                  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full
+                    bg-amber-500/8 text-amber-600/60">
+                    <Icon name="material-symbols:photo-library" class="text-sm" />{photos.length} 张
+                  </span>
+                </div>
+
+                {albumMeta.tags && albumMeta.tags.length > 0 && (
+                  <div class="flex flex-wrap justify-center gap-1.5 mb-6">
+                    {albumMeta.tags.map((tag) => (
+                      <span class="text-xs px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5
+                        text-black/30 dark:text-white/25 border border-black/5 dark:border-white/5">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <!-- 分隔线 -->
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="flex-1 h-px bg-gradient-to-r from-transparent via-(--primary)/25 to-transparent"></div>
+                  <Icon name="material-symbols:vpn-key" class="text-lg text-(--primary)/40" />
+                  <div class="flex-1 h-px bg-gradient-to-r from-transparent via-(--primary)/25 to-transparent"></div>
+                </div>
+
+                <!-- 密码表单 -->
+                <form id="unlock-form" class="space-y-3 max-w-[240px] mx-auto">
+                  {albumMeta.passwordHint && (
+                    <p class="text-xs text-center text-black/30 dark:text-white/25">
+                      <Icon name="material-symbols:info-outline" class="text-xs inline align-middle mr-0.5 text-amber-500/50" />
+                      {albumMeta.passwordHint}
+                    </p>
+                  )}
+                  <div class="relative">
+                    <Icon name="material-symbols:lock-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-black/20 dark:text-white/20 pointer-events-none" />
+                    <input
+                      id="unlock-password"
+                      type="password"
+                      placeholder="输入密码"
+                      autocomplete="off"
+                      class="w-full pl-10 pr-9 py-2.5 rounded-xl text-sm
+                        bg-black/5 dark:bg-white/8
+                        border border-black/10 dark:border-white/10
+                        text-black/75 dark:text-white/80
+                        placeholder-black/25 dark:placeholder-white/25
+                        outline-none focus:border-(--primary) focus:ring-2 focus:ring-(--primary)/15
+                        transition-all duration-200"
+                    />
+                    <button type="button" id="toggle-password-visibility"
+                      class="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-lg
+                        text-black/20 dark:text-white/20 hover:text-black/45 dark:hover:text-white/45 transition-colors cursor-pointer border-none bg-transparent">
+                      <Icon name="material-symbols:visibility" class="text-base" />
+                    </button>
+                  </div>
+                  <button type="submit" id="unlock-btn"
+                    class="w-full py-2.5 rounded-xl text-sm font-semibold
+                      bg-gradient-to-r from-(--primary) to-pink-400 text-white
+                      hover:brightness-110 active:scale-[0.98] transition-all duration-200
+                      shadow-lg shadow-(--primary)/25 cursor-pointer border-none
+                      flex items-center justify-center gap-1.5">
+                    <Icon name="material-symbols:lock-open" class="text-lg" />
+                    解锁
+                  </button>
+                  <p id="unlock-error" class="text-xs text-red-500 text-center hidden">
+                    密码错误，请重试
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 解锁后内容 —— 与非加密相册布局一致 -->
+          <div id="unlocked-content" class="hidden">
+            {cover ? (
+              <div class="w-full rounded-(--radius-large) overflow-hidden relative mb-4">
+                <div class="relative w-full aspect-[3/1] min-h-[200px] max-h-[360px] overflow-hidden rounded-2xl">
+                  <div class="lqip-placeholder absolute inset-0 pointer-events-none" style={coverLqipProps.style} aria-hidden="true"></div>
+                  <img src={cover} alt={albumMeta.name} class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  <div class="absolute bottom-0 left-0 right-0 p-6">
+                    <div class="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-lg">{albumMeta.name}</div>
+                    {albumMeta.description && <p class="text-sm text-white/75 leading-relaxed mb-2 max-w-2xl line-clamp-2">{albumMeta.description}</p>}
+                    <div class="flex items-center gap-4 text-sm text-white/80 flex-wrap">
+                      {albumMeta.date && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:calendar-today" class="text-sm" />{albumMeta.date}</span>}
+                      {albumMeta.location && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:location-on" class="text-sm" />{albumMeta.location}</span>}
+                      <span class="inline-flex items-center gap-1"><Icon name="material-symbols:photo-library" class="text-sm" />{photos.length} 张照片</span>
+                    </div>
+                    {albumMeta.tags && albumMeta.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1.5 mt-2.5">
+                        {albumMeta.tags.map((tag) => <span class="text-xs px-2 py-0.5 rounded bg-white/20 text-white/90 backdrop-blur-sm">{tag}</span>)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div class="card-base px-6 py-4 rounded-2xl mb-4">
+                <div class="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100">{albumMeta.name}</div>
+                <div class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400 mt-2 flex-wrap">
+                  {albumMeta.date && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:calendar-today" class="text-sm" />{albumMeta.date}</span>}
+                  {albumMeta.location && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:location-on" class="text-sm" />{albumMeta.location}</span>}
+                  <span>{photos.length} 张照片</span>
+                </div>
+              </div>
+            )}
+            <div class="w-full rounded-(--radius-large) overflow-hidden relative gallery-grid-container">
+              <div class="card-base z-10 px-6 py-6 relative w-full rounded-2xl">
+                <div id="decrypted-gallery"></div>
+              </div>
+            </div>
+          </div>
+
+          <script is:inline>
+          (function() {
+            var root = document.getElementById('encrypted-album-root');
+            if (!root) return;
+            var encrypted = root.getAttribute('data-encrypted');
+            var slug = root.getAttribute('data-slug');
+            var lockScreen = document.getElementById('lock-screen');
+            var unlockedContent = document.getElementById('unlocked-content');
+            var decryptedGallery = document.getElementById('decrypted-gallery');
+            var form = document.getElementById('unlock-form');
+            var input = document.getElementById('unlock-password');
+            var errorEl = document.getElementById('unlock-error');
+            var toggleBtn = document.getElementById('toggle-password-visibility');
+            var unlockBtn = document.getElementById('unlock-btn');
+
+            var ITERATIONS = 100000, SALT_LEN = 16, IV_LEN = 12, TAG_LEN = 16;
+            var STORAGE_KEY = '__album_pwd_' + slug;
+
+            function base64ToBytes(b64) {
+              var bin = atob(b64);
+              var bytes = new Uint8Array(bin.length);
+              for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              return bytes;
+            }
+
+            async function decrypt(pwd) {
+              var raw = base64ToBytes(encrypted);
+              var salt = raw.slice(0, SALT_LEN);
+              var iv = raw.slice(SALT_LEN, SALT_LEN + IV_LEN);
+              var authTag = raw.slice(SALT_LEN + IV_LEN, SALT_LEN + IV_LEN + TAG_LEN);
+              var ciphertext = raw.slice(SALT_LEN + IV_LEN + TAG_LEN);
+              var combined = new Uint8Array(ciphertext.length + TAG_LEN);
+              combined.set(ciphertext);
+              combined.set(authTag, ciphertext.length);
+              var enc = new TextEncoder();
+              var keyMaterial = await crypto.subtle.importKey('raw', enc.encode(pwd), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
+              var key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: ITERATIONS, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+              var decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, combined);
+              return new TextDecoder().decode(decrypted);
+            }
+
+            function revealGallery(html) {
+              decryptedGallery.innerHTML = html;
+              lockScreen.classList.add('hidden');
+              unlockedContent.classList.remove('hidden');
+              var scripts = decryptedGallery.querySelectorAll('script');
+              for (var i = 0; i < scripts.length; i++) {
+                var old = scripts[i], ns = document.createElement('script');
+                for (var j = 0; j < old.attributes.length; j++) ns.setAttribute(old.attributes[j].name, old.attributes[j].value);
+                ns.textContent = old.textContent;
+                old.parentNode.replaceChild(ns, old);
+              }
+              try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch(e) {}
+              var layoutToggle = document.getElementById('gallery-layout-toggle');
+              if (layoutToggle) layoutToggle.classList.remove('hidden');
+              var dimToggle = document.getElementById('gallery-dim-toggle');
+              if (dimToggle) dimToggle.classList.remove('hidden');
+              document.dispatchEvent(new CustomEvent('password:decrypted'));
+            }
+
+            function showError() { errorEl.classList.remove('hidden'); }
+            function hideError() { errorEl.classList.add('hidden'); }
+
+            if (toggleBtn) {
+              toggleBtn.addEventListener('click', function() {
+                if (input.type === 'password') {
+                  input.type = 'text';
+                  toggleBtn.innerHTML = '<iconify-icon icon="material-symbols:visibility-off" class="text-lg" style="display:inline-block" data-icon="material-symbols:visibility-off"></iconify-icon>';
+                } else {
+                  input.type = 'password';
+                  toggleBtn.innerHTML = '<iconify-icon icon="material-symbols:visibility" class="text-lg" style="display:inline-block" data-icon="material-symbols:visibility"></iconify-icon>';
+                }
+              });
+            }
+
+            form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              var pwd = input.value.trim();
+              if (!pwd) return;
+              hideError();
+              var originalHTML = unlockBtn.innerHTML;
+              unlockBtn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> 验证中...';
+              unlockBtn.disabled = true;
+              decrypt(pwd).then(function(html) {
+                revealGallery(html);
+              }).catch(function() {
+                showError();
+                unlockBtn.innerHTML = originalHTML;
+                unlockBtn.disabled = false;
+              });
+            });
+          })();
+          </script>
+
+          <style is:inline>
+            @keyframes vaultPulse {
+              0%, 100% { transform: scale(1); opacity: 0.6; }
+              50% { transform: scale(1.25); opacity: 0.15; }
+            }
+            @keyframes fadeInUp {
+              from { opacity: 0; transform: translateY(16px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+            .animate-spin { animation: spin 0.8s linear infinite; }
+          </style>
+        </div>
+
+      ) : cover ? (
+        <!-- ============ 普通相册：封面横幅 + 照片网格 ============ -->
+        <>
+          <div class="w-full rounded-(--radius-large) overflow-hidden relative mb-4">
+            <div class="relative w-full aspect-[3/1] min-h-[200px] max-h-[360px] overflow-hidden rounded-2xl">
+              <div class="lqip-placeholder absolute inset-0 pointer-events-none" style={coverLqipProps.style} aria-hidden="true"></div>
+              <img src={cover} alt={albumMeta.name} class="w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-out" onload="this.classList.remove('opacity-0')" onerror="this.classList.remove('opacity-0')" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div class="absolute bottom-0 left-0 right-0 p-6">
+                <div class="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-lg">{albumMeta.name}</div>
+                {albumMeta.description && <p class="text-sm text-white/75 leading-relaxed mb-2 max-w-2xl line-clamp-2">{albumMeta.description}</p>}
+                <div class="flex items-center gap-4 text-sm text-white/80 flex-wrap">
+                  {albumMeta.date && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:calendar-today" class="text-sm" />{albumMeta.date}</span>}
+                  {albumMeta.location && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:location-on" class="text-sm" />{albumMeta.location}</span>}
+                  <span class="inline-flex items-center gap-1"><Icon name="material-symbols:photo-library" class="text-sm" />{photos.length} 张照片</span>
+                </div>
+                {albumMeta.tags && albumMeta.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-1.5 mt-2.5">
+                    {albumMeta.tags.map((tag) => <span class="text-xs px-2 py-0.5 rounded bg-white/20 text-white/90 backdrop-blur-sm">{tag}</span>)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full rounded-(--radius-large) overflow-hidden relative gallery-grid-container">
+            <div class="card-base z-10 px-6 py-6 relative w-full rounded-2xl">
+              {photos.length > 0 ? (
+                <div class="gallery-masonry" style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}>
+                  {photos.map((photo) => (<PhotoCard src={photo} albumId={albumMeta.id} />))}
+                </div>
+              ) : (
+                <div class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500">
+                  <Icon name="material-symbols:photo-library" class="text-6xl mb-4 opacity-50" />
+                  <p class="text-lg">{i18n(I18nKey.galleryNoAlbums)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <!-- 无封面普通相册 -->
+        <>
+          <div class="card-base px-6 py-4 rounded-2xl mb-4">
+            <div class="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100">{albumMeta.name}</div>
+            <div class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400 mt-2 flex-wrap">
+              {albumMeta.date && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:calendar-today" class="text-sm" />{albumMeta.date}</span>}
+              {albumMeta.location && <span class="inline-flex items-center gap-1"><Icon name="material-symbols:location-on" class="text-sm" />{albumMeta.location}</span>}
+              <span>{photos.length} 张照片</span>
+            </div>
+          </div>
+          <div class="w-full rounded-(--radius-large) overflow-hidden relative gallery-grid-container">
+            <div class="card-base z-10 px-6 py-6 relative w-full rounded-2xl">
+              {photos.length > 0 ? (
+                <div class="gallery-masonry" style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}>
+                  {photos.map((photo) => (<PhotoCard src={photo} albumId={albumMeta.id} />))}
+                </div>
+              ) : (
+                <div class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500">
+                  <Icon name="material-symbols:photo-library" class="text-6xl mb-4 opacity-50" />
+                  <p class="text-lg">{i18n(I18nKey.galleryNoAlbums)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  </main>
+
+  <SpineModel></SpineModel>
+  {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  </div>
+  <div id="right-sidebar-dynamic" style="display:none"></div>
+  <div id="floating-toc-wrapper" style="display:none"></div>
+</Layout>
+
+<style is:global>
+  @keyframes galleryGradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @media (min-width: 640px) {
+    .gallery-masonry {
+      column-width: var(--col-width, 240px) !important;
+      column-count: auto !important;
     }
-  </style>
-</MainGridLayout>
+  }
+
+  /* 散乱展示模式 */
+  .gallery-grid-container.is-scattered .card-base {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1rem !important;
+    overflow: visible !important;
+  }
+  .gallery-grid-container.is-scattered .gallery-masonry {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    column-count: auto !important;
+    column-width: auto !important;
+    padding: 2rem;
+    min-height: 50vh;
+  }
+  .gallery-grid-container.is-scattered .gallery-photo-card,
+  .gallery-grid-container.is-scattered .break-inside-avoid {
+    width: auto;
+    margin: 0 !important;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, z-index 0s;
+    position: relative;
+    z-index: 1;
+  }
+  .gallery-grid-container.is-scattered .gallery-photo-card img,
+  .gallery-grid-container.is-scattered .break-inside-avoid img {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    max-height: 220px;
+    width: auto;
+  }
+  .gallery-grid-container.is-scattered .gallery-photo-card a,
+  .gallery-grid-container.is-scattered .break-inside-avoid > div {
+    display: block;
+  }
+  /* 散乱排列：旋转+偏移，但不重叠 */
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+1),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+1) { transform: rotate(-6deg) translateY(-4px); }
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+2),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+2) { transform: rotate(5deg) translateY(6px); }
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+3),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+3) { transform: rotate(-4deg) translateY(-2px); }
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+4),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+4) { transform: rotate(7deg) translateY(2px); }
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+5),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+5) { transform: rotate(-5deg) translateY(-6px); }
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+6),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+6) { transform: rotate(3deg) translateY(4px); }
+  .gallery-grid-container.is-scattered .gallery-photo-card:nth-child(7n+7),
+  .gallery-grid-container.is-scattered .break-inside-avoid:nth-child(7n+7) { transform: rotate(-7deg) translateY(0px); }
+  /* 悬停：回正并弹出 */
+  .gallery-grid-container.is-scattered .gallery-photo-card:hover,
+  .gallery-grid-container.is-scattered .break-inside-avoid:hover {
+    transform: rotate(0deg) translateY(0) scale(1.08) !important;
+    z-index: 50 !important;
+  }
+  .gallery-grid-container.is-scattered .gallery-photo-card:hover img,
+  .gallery-grid-container.is-scattered .break-inside-avoid:hover img {
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  }
+  .gallery-grid-container.is-scattered .lqip-placeholder {
+    border-radius: 0.5rem;
+  }
+  /* 暗光模式：图片变暗，悬停提亮 */
+  .gallery-grid-container.is-dimmed .gallery-photo-card img,
+  .gallery-grid-container.is-dimmed .break-inside-avoid img {
+    filter: brightness(0.25) blur(8px);
+    transition: filter 0.5s ease;
+  }
+  .gallery-grid-container.is-dimmed .gallery-photo-card:hover img,
+  .gallery-grid-container.is-dimmed .break-inside-avoid:hover img {
+    filter: brightness(1) blur(0);
+  }
+  /* 暗光+散乱模式共存 */
+  .gallery-grid-container.is-dimmed.is-scattered .gallery-photo-card:hover,
+  .gallery-grid-container.is-dimmed.is-scattered .break-inside-avoid:hover {
+    transform: rotate(0deg) translateY(0) scale(1.08) !important;
+    z-index: 50 !important;
+  }
+  /* 按钮激活态 */
+  #gallery-layout-toggle.is-active,
+  #gallery-dim-toggle.is-active {
+    background: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px var(--primary-alpha, rgba(168,85,247,0.3));
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var btn = document.getElementById('gallery-layout-toggle');
+    if (!btn) return;
+    var STORAGE_KEY = '__gallery_scattered';
+
+    function getContainers() {
+      return document.querySelectorAll('.gallery-grid-container');
+    }
+
+    function setScattered(on) {
+      getContainers().forEach(function(c) {
+        c.classList.toggle('is-scattered', on);
+      });
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('title', on ? '网格展示' : '散乱展示');
+    }
+
+    var scattered = false;
+    try { scattered = localStorage.getItem(STORAGE_KEY) === '1'; } catch(e) {}
+    setScattered(scattered);
+
+    btn.addEventListener('click', function() {
+      scattered = !scattered;
+      setScattered(scattered);
+      try { localStorage.setItem(STORAGE_KEY, scattered ? '1' : '0'); } catch(e) {}
+    });
+  })();
+  // 暗光模式切换
+  (function() {
+    var btn = document.getElementById('gallery-dim-toggle');
+    if (!btn) return;
+    var STORAGE_KEY = '__gallery_dimmed';
+
+    function getContainers() {
+      return document.querySelectorAll('.gallery-grid-container');
+    }
+
+    function setDimmed(on) {
+      getContainers().forEach(function(c) {
+        c.classList.toggle('is-dimmed', on);
+      });
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('title', on ? '正常模式' : '暗光模式');
+    }
+
+    var dimmed = false;
+    try { dimmed = localStorage.getItem(STORAGE_KEY) === '1'; } catch(e) {}
+    setDimmed(dimmed);
+
+    btn.addEventListener('click', function() {
+      dimmed = !dimmed;
+      setDimmed(dimmed);
+      try { localStorage.setItem(STORAGE_KEY, dimmed ? '1' : '0'); } catch(e) {}
+    });
+  })();
+</script>

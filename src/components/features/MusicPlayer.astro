@@ -27,6 +27,9 @@ const viewConfigStr = JSON.stringify({
 		pause: i18n(I18nKey.musicPause),
 		noCover: i18n(I18nKey.musicNoCover),
 		music: i18n(I18nKey.music),
+		listLoop: i18n(I18nKey.musicListLoop),
+		singleLoop: i18n(I18nKey.musicSingleLoop),
+		shuffle: i18n(I18nKey.musicShuffle),
 	},
 });
 
@@ -304,16 +307,19 @@ const widgetId =
             ui.iconRepeat.classList.remove('hidden');
             ui.iconRepeatOne.classList.add('hidden');
             ui.iconShuffle.classList.add('hidden');
+            ui.btnRepeat.setAttribute('title', config.i18n.listLoop || '列表循环');
         } else if (playMode === 1) {
             ui.btnRepeat.className = 'p-2 active:scale-95 transition-colors ' + primaryColor;
             ui.iconRepeat.classList.add('hidden');
             ui.iconRepeatOne.classList.remove('hidden');
             ui.iconShuffle.classList.add('hidden');
+            ui.btnRepeat.setAttribute('title', config.i18n.singleLoop || '单曲循环');
         } else {
             ui.btnRepeat.className = 'p-2 active:scale-95 transition-colors ' + primaryColor;
             ui.iconRepeat.classList.add('hidden');
             ui.iconRepeatOne.classList.add('hidden');
             ui.iconShuffle.classList.remove('hidden');
+            ui.btnRepeat.setAttribute('title', config.i18n.shuffle || '随机播放');
         }
     }
 

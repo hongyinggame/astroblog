@@ -36,7 +36,39 @@ const specCollection = defineCollection({
 	schema: z.object({}),
 });
 
+const chattersCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/chatters" }),
+	schema: z.object({
+		title: z.string(),
+		published: z.date(),
+		updated: z.date().optional(),
+		description: z.string().optional().default(""),
+		image: z.string().optional().default(""),
+		tags: z.array(z.string()).optional().default([]),
+		draft: z.boolean().optional().default(false),
+		pinned: z.boolean().optional().default(false),
+	}),
+});
+
+const essaysCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/essays" }),
+	schema: z.object({
+		title: z.string(),
+		published: z.date(),
+		updated: z.date().optional(),
+		description: z.string().optional().default(""),
+		image: z.string().optional().default(""),
+		tags: z.array(z.string()).optional().default([]),
+		category: z.string().optional().default("杂谈"),
+		draft: z.boolean().optional().default(false),
+		pinned: z.boolean().optional().default(false),
+		comment: z.boolean().optional().default(true),
+	}),
+});
+
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
+	chatters: chattersCollection,
+	essays: essaysCollection,
 };
