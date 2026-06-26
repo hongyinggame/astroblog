@@ -296,3 +296,30 @@ comment: true    # 是否允许评论
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
+
+## 新建文件的相关命令
+
+  # 新建文章
+  pnpm new-post 文件名
+
+  # 新建说说
+  pnpm new-post 文件名 --type chatter
+
+  # 新建杂谈
+  pnpm new-post 文件名 --type essay
+
+  每种类型会生成对应的 frontmatter 模板：
+  - 文章：含 category、image、draft、lang 字段
+  - 说说：时间精确到秒，默认 tags: [日常]
+  - 杂谈：精简模板，含 tags
+  # 带有子目录  
+  pnpm new-post 子目录/文件名
+
+  例如：
+
+  # 文章放在 src/content/posts/技术/前端/
+  pnpm new-post 技术/前端/react-hooks
+
+  # 说说也可以
+  pnpm new-post 2026/六月随记 --type chatter
