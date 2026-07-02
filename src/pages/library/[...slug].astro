@@ -1,0 +1,264 @@
+---
+import { render, getCollection } from "astro:content";
+import type { ImageMetadata } from "astro";
+import Layout from "@/layouts/Layout.astro";
+import Navbar from "@/components/layout/Navbar.astro";
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import BackgroundEffects from "@/components/effects/BackgroundEffects.svelte";
+import Markdown from "@/components/common/Markdown.astro";
+import { backgroundWallpaper, live2dWidgetConfig, siteConfig } from "@/config";
+import Live2DWidget from "@/components/features/Live2DWidget.astro";
+import SpineModel from "@/components/features/SpineModel.astro";
+import { getRatingInfo } from "@/utils/rating-utils";
+import { Icon } from "astro-icon/components";
+import "@/styles/library.css";
+
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+  const films = await getCollection("films");
+  return [
+    ...books.map((entry) => ({
+      params: { slug: `books/${entry.id}` },
+      props: { entry, collection: "books" as const },
+    })),
+    ...films.map((entry) => ({
+      params: { slug: `films/${entry.id}` },
+      props: { entry, collection: "films" as const },
+    })),
+  ];
+}
+
+interface Props {
+  entry: any;
+  collection: "books" | "films";
+}
+
+const { entry, collection } = Astro.props;
+const { Content } = await render(entry);
+
+const bookImageModules = import.meta.glob<ImageMetadata>(
+  "/src/content/books/**/*.{avif,webp,jpg,jpeg,png}",
+  { eager: true, import: "default" },
+);
+const filmImageModules = import.meta.glob<ImageMetadata>(
+  "/src/content/films/**/*.{avif,webp,jpg,jpeg,png}",
+  { eager: true, import: "default" },
+);
+
+function resolveCover(
+  coverPath: string,
+  collectionBase: string,
+  imageModules: Record<string, ImageMetadata>,
+): string {
+  if (!coverPath) return "";
+  if (coverPath.startsWith("http://") || coverPath.startsWith("https://")) {
+    return coverPath;
+  }
+  const normalized = coverPath.replace(/^\.\/?/, "");
+  const fullPath = `${collectionBase}/${normalized}`;
+  for (const [key, mod] of Object.entries(imageModules)) {
+    if (key.endsWith(normalized) || key === fullPath) {
+      return (mod as any).src ?? mod;
+    }
+  }
+  return coverPath;
+}
+
+const coverSrc = collection === "books"
+  ? resolveCover(entry.data.cover, "/src/content/books", bookImageModules)
+  : resolveCover(entry.data.cover, "/src/content/films", filmImageModules);
+
+const ratingInfo = getRatingInfo(entry.data.rating);
+const filledStars = "★".repeat(ratingInfo.stars);
+const emptyStars = "☆".repeat(6 - ratingInfo.stars);
+const gradeLower = ratingInfo.grade.toLowerCase();
+
+const typeLabel = entry.data.type
+  ? (entry.data.type === "movie" ? "电影" : entry.data.type === "tv" ? "电视剧" : entry.data.type)
+  : "";
+
+// Background wallpaper
+const backgroundImages = backgroundWallpaper.src;
+let bgImage = "";
+let bgImageMobile = "";
+if (
+  typeof backgroundImages === "object" &&
+  backgroundImages !== null &&
+  !Array.isArray(backgroundImages) &&
+  "desktop" in backgroundImages
+) {
+  const d = backgroundImages.desktop;
+  const m = backgroundImages.mobile;
+  if (Array.isArray(d)) bgImage = d[Math.floor(Math.random() * d.length)];
+  else if (d) bgImage = d;
+  if (Array.isArray(m)) bgImageMobile = m[Math.floor(Math.random() * m.length)];
+  else if (m) bgImageMobile = m;
+  else bgImageMobile = bgImage;
+} else if (typeof backgroundImages === "string") {
+  bgImage = backgroundImages;
+  bgImageMobile = backgroundImages;
+}
+
+const themeColors = ["#667eea", "#764ba2", "#f093fb", "#f5576c"];
+
+const stickyNavbar = siteConfig.navbar.stickyNavbar ?? false;
+const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
+---
+
+<Layout title={entry.data.title} description={entry.data.title}>
+  <script is:inline>document.body.classList.add("is-standalone")</script>
+  <div id="banner-overlay-container" style="display:none"></div>
+  <div id="banner-dim-container" style="display:none"></div>
+  <div id="left-sidebar-dynamic" style="display:none"></div>
+  <div id="swup-container">
+
+  <!-- Fixed Background Layer -->
+  <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+    {bgImageMobile && (
+      <div class="absolute inset-0 block lg:hidden">
+        <ImageWrapper
+          src={bgImageMobile} alt=""
+          class="!absolute !inset-0 !w-full !h-full"
+          loading="eager" fetchpriority="high"
+          widths={[640, 750, 1080]} sizes="100vw"
+        />
+      </div>
+    )}
+    {bgImage && (
+      <div class="absolute inset-0 hidden lg:block">
+        <ImageWrapper
+          src={bgImage} alt=""
+          class="!absolute !inset-0 !w-full !h-full"
+          loading="eager" fetchpriority="high"
+          widths={[1280, 1920, 2560]} sizes="100vw"
+        />
+      </div>
+    )}
+    <div class="absolute inset-0 z-[1] bg-white/30 dark:bg-slate-900/40 backdrop-blur-md transition-colors duration-1000"></div>
+    <div class="absolute inset-0 z-[2] opacity-50 dark:opacity-20 mix-blend-color transition-opacity duration-1000"
+      style={`background: linear-gradient(-45deg, ${themeColors.join(", ")}); background-size: 400% 400%; animation: libraryGradientMove 15s ease infinite;`}></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-indigo-900/20 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-400/25 dark:bg-purple-900/30 blur-[100px] rounded-full z-[3] md:mix-blend-overlay"></div>
+  </div>
+
+  <BackgroundEffects client:load />
+
+  <!-- Navbar -->
+  <div
+    id="top-row"
+    class="z-50 pointer-events-none relative transition-all duration-700 mx-auto"
+    class:list={[
+      stickyNavbar ? "h-18 fixed top-0 left-0 right-0 z-80" : "",
+      navbarWidthFull ? "" : "w-full xl:w-[92vw] max-w-(--page-width) px-0 md:px-4",
+    ]}
+  >
+    <div
+      id="navbar-wrapper"
+      class:list={[
+        "pointer-events-auto transition-all",
+        stickyNavbar ? "" : "sticky top-0",
+      ]}
+    >
+      <Navbar />
+    </div>
+  </div>
+
+  <main class="relative z-10 min-h-screen pt-24 md:pt-28 pb-10" data-library-page>
+    <div class="max-w-xl mx-auto px-5 md:px-8">
+
+      <!-- Back link -->
+      <a href="/library/" class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl font-medium no-underline mb-6
+        text-white/80 bg-white/10 backdrop-blur-md border border-white/20
+        hover:text-white hover:bg-white/20 hover:border-white/30
+        transition-all duration-200 ease-out">
+        <Icon name="material-symbols:arrow-back-rounded" class="text-lg" />
+        返回档案馆
+      </a>
+
+      <!-- Content card -->
+      <div class="relative z-10 bg-white/60 dark:bg-slate-800/50 backdrop-blur-xl rounded-3xl
+        border border-white/50 dark:border-white/10
+        shadow-lg shadow-(--primary)/5
+        px-6 md:px-10 pt-8 pb-6 mb-4
+        transition-all duration-300">
+
+        <!-- Cover + Info -->
+        <div class="flex items-stretch gap-6 mb-6">
+          {coverSrc && (
+            <div class="w-28 shrink-0">
+              <img src={coverSrc} alt={entry.data.title} class="w-full h-full object-cover rounded-xl shadow-lg" referrerpolicy="no-referrer" />
+            </div>
+          )}
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start gap-3 mb-2">
+              <h1 class="text-2xl md:text-3xl font-bold text-black/85 dark:text-white/90">
+                {entry.data.title}
+              </h1>
+              {typeLabel && (
+                <span class="type-badge-sm shrink-0">{typeLabel}</span>
+              )}
+            </div>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-black/50 dark:text-white/50">
+              {entry.data.author && (
+                <span class="flex items-center gap-1">
+                  <Icon name="material-symbols:person-outline-rounded" class="text-base" />
+                  {entry.data.author}
+                </span>
+              )}
+              <span class="flex items-center gap-1">
+                <Icon name="material-symbols:calendar-today-outline-rounded" class="text-base" />
+                {new Date(entry.data.published).getFullYear()}-{String(new Date(entry.data.published).getMonth() + 1).padStart(2, '0')}-{String(new Date(entry.data.published).getDate()).padStart(2, '0')}
+              </span>
+              <span class="flex items-center gap-1 text-yellow-500">
+                <span>{filledStars}{emptyStars}</span>
+                <span class="font-semibold">{entry.data.rating}</span>
+              </span>
+              <span class={`rating-badge-sm ${gradeLower}`}>{ratingInfo.grade}</span>
+            </div>
+            <div class="mt-2 h-1 w-20 rounded-full bg-gradient-to-r from-(--primary) via-pink-400 to-amber-400"></div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-2 mb-5">
+          <div class="flex-1 h-px bg-gradient-to-r from-transparent via-(--primary)/30 to-transparent"></div>
+          <span class="text-(--primary)/40 text-xs">✦</span>
+          <div class="flex-1 h-px bg-gradient-to-r from-transparent via-pink-400/30 to-transparent"></div>
+        </div>
+
+        <!-- Markdown content -->
+        <Markdown class="mb-6 markdown-content">
+          <Content />
+        </Markdown>
+      </div>
+    </div>
+  </main>
+
+  <SpineModel></SpineModel>
+  {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  </div>
+  <div id="right-sidebar-dynamic" style="display:none"></div>
+  <div id="floating-toc-wrapper" style="display:none"></div>
+</Layout>
+
+<style>
+  .markdown-content a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .markdown-content img {
+    border-radius: 0.75rem;
+    max-width: 100%;
+  }
+  .markdown-content h2 { font-size: 1.5rem; }
+  .markdown-content h3 { font-size: 1.25rem; }
+</style>
+
+<style is:global>
+  @keyframes libraryGradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>

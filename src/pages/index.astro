@@ -112,18 +112,21 @@ const searchPosts = sortedPosts.map((p) => ({
   title: p.data.title,
   description: p.data.description,
   tags: p.data.tags,
+  body: p.body || "",
 }));
 const searchChatters = sortedChatters.map((c) => ({
   id: c.id,
   type: "chatter" as const,
   title: c.data.title,
   description: c.data.description,
+  body: c.body || "",
 }));
 const searchEssays = sortedEssays.map((e) => ({
   id: e.id,
   type: "essay" as const,
   title: e.data.title,
   description: e.data.description,
+  body: e.body || "",
 }));
 const allSearchItems = [...searchPosts, ...searchChatters, ...searchEssays];
 

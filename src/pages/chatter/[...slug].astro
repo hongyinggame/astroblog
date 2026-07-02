@@ -13,6 +13,7 @@ import { backgroundWallpaper, live2dWidgetConfig, siteConfig } from "@/config";
 import { Icon } from "astro-icon/components";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import "@/styles/moment-list.css";
 
 export async function getStaticPaths() {
   const chatters = await getCollection("chatters", ({ data }) => {
@@ -294,6 +295,114 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
+
+	/* ── 内容排版样式（独立于 markdown.css）── */
+	.markdown-content a:not(.no-styling) {
+		position: relative;
+		background: none;
+		font-weight: 500;
+		color: var(--primary);
+		text-decoration: underline;
+		text-decoration-color: var(--link-underline);
+		text-decoration-thickness: 1px;
+		text-decoration-style: dashed;
+		text-underline-offset: 4px;
+		word-break: break-word;
+	}
+	.markdown-content a:not(.no-styling):hover,
+	.markdown-content a:not(.no-styling):active {
+		text-decoration: none;
+		background: var(--btn-plain-bg-hover);
+		border-bottom: 1px dashed var(--link-hover);
+	}
+
+	.markdown-content code {
+		background: var(--inline-code-bg);
+		color: var(--inline-code-color);
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.375rem;
+		font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	}
+	.markdown-content code::before { content: none; }
+	.markdown-content code::after { content: none; }
+
+	.markdown-content blockquote {
+		font-style: normal;
+		border-color: transparent;
+		position: relative;
+		font-weight: inherit;
+	}
+	.markdown-content blockquote::before {
+		content: "";
+		position: absolute;
+		left: -0.25rem;
+		display: block;
+		background: var(--btn-regular-bg);
+		height: 100%;
+		width: 0.25rem;
+		border-radius: 9999px;
+	}
+	.markdown-content blockquote p::before,
+	.markdown-content blockquote p::after {
+		content: none;
+	}
+
+	.markdown-content ul li::marker,
+	.markdown-content ol li::marker {
+		color: var(--primary);
+	}
+
+	.markdown-content h1 { font-size: 1.875rem; }
+	.markdown-content h2 { font-size: 1.5rem; }
+	.markdown-content h3 { font-size: 1.25rem; }
+	.markdown-content h4 { font-size: 1.125rem; }
+
+	.markdown-content img {
+		border-radius: 0.75rem;
+	}
+
+	.markdown-content hr {
+		border-color: var(--line-divider);
+		border-style: dashed;
+	}
+
+	.markdown-content table {
+		border-collapse: separate;
+		border-spacing: 0;
+		border-radius: calc(var(--radius-large) - 0.5rem);
+		overflow: hidden;
+		margin: 1rem 0;
+	}
+	.markdown-content th {
+		background: var(--btn-regular-bg);
+		font-weight: 600;
+		color: var(--btn-content);
+		border-bottom: 1px solid var(--line-color);
+	}
+	.markdown-content td {
+		background: var(--card-bg);
+	}
+	.markdown-content tr:nth-child(even) td {
+		background: var(--btn-plain-bg-active);
+	}
+	.markdown-content th,
+	.markdown-content td {
+		padding: 0.5rem 0.75rem;
+		text-align: left;
+		word-break: break-word;
+	}
+	.markdown-content th:not(:last-child),
+	.markdown-content td:not(:last-child) {
+		border-right: 1px solid var(--line-color);
+	}
+
+	.markdown-content iframe {
+		border-radius: 0.75rem;
+		margin-left: auto;
+		margin-right: auto;
+		max-width: 100%;
+	}
+
 </style>
 
 <style>

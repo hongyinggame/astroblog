@@ -124,6 +124,17 @@ export const siteConfig: SiteConfig = {
 	// OpenGraph图片功能,注意开启后要渲染很长时间，不建议本地调试的时候开启
 	generateOgImages: false,
 
+	// 追番配置（Bilibili + TMDB）
+	anime: {
+		bilibili: {
+			uid: "38932988",
+		},
+		// tmdb: {
+		// 	apiKey: "your-tmdb-api-key",
+		// 	listId: "your-tmdb-list-id",
+		// },
+	},
+
 	// bangumi配置
 	bangumi: {
 		// Bangumi用户ID
@@ -133,9 +144,9 @@ export const siteConfig: SiteConfig = {
 		// dynamic 模式在浏览器中实时请求 API，始终显示最新数据
 		mode: "dynamic",
 		// Bangumi API 地址
-		apiUrl: "https://api.bangumi.one",
+		apiUrl: "https://bgmapi.anibt.net",
 		// 详情页地址
-		subjectBaseUrl: "https://bangumi.one/subject/",
+		subjectBaseUrl: "https://bgmmi.anibt.net/subject/",
 		// 条目类型排序，数组中的类型将按顺序优先展示
 		// 可选值: "anime" | "book" | "music" | "game" | "real" (暂不支持"real"类型)
 		// 未列出的类型将按默认顺序排在后面
@@ -155,10 +166,14 @@ export const siteConfig: SiteConfig = {
 		bangumi: true,
 		// 相册页面开关
 		gallery: true,
+		// 追番页面开关，需要配置anime.bilibili.uid或anime.tmdb
+		anime: true,
 		// 说说页面开关
 		chatters: true,
 		// 杂谈页面开关
 		essays: true,
+		// 档案馆页面开关
+		library: true,
 	},
 
 	// 分类导航栏开关，在首页和归档页顶部显示分类快捷导航

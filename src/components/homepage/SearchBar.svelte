@@ -5,6 +5,7 @@
 		title: string;
 		description?: string;
 		tags?: string[];
+		body?: string;
 	}
 
 	let { items = [] }: { items: SearchItem[] } = $props();
@@ -19,18 +20,21 @@
 
 	let filtered = $derived(
 		query.trim().length > 0
-			? items
-					.filter((item) => {
-						const q = query.toLowerCase();
-						return (
-							item.title.toLowerCase().includes(q) ||
-							(item.description || "").toLowerCase().includes(q) ||
-							(item.tags || []).some((t) => t.toLowerCase().includes(q))
-						);
-					})
-					.slice(0, 8)
+			? items.filter((item) => {
+					const q = query.toLowerCase();
+					return (
+						item.title.toLowerCase().includes(q) ||
+						(item.description || "").toLowerCase().includes(q) ||
+						(item.tags || []).some((t) => t.toLowerCase().includes(q)) ||
+						(item.body || "").toLowerCase().includes(q)
+					);
+				})
 			: [],
 	);
+
+	let visible = $derived(filtered.slice(0, 15));
+	let hasMore = $derived(filtered.length > 15);
+	let totalCount = $derived(filtered.length);
 
 	function getUrl(item: SearchItem): string {
 		if (item.type === "post") return `/posts/${item.id}/`;
@@ -90,8 +94,8 @@
 
 	{#if isOpen && query.trim()}
 		<div class="search-dropdown">
-			{#if filtered.length > 0}
-				{#each filtered as item}
+			{#if visible.length > 0}
+				{#each visible as item}
 					<a href={getUrl(item)} class="search-result">
 						<div class="result-header">
 							<span class="result-type">{typeLabel(item.type)}</span>
@@ -109,6 +113,11 @@
 						{/if}
 					</a>
 				{/each}
+				{#if hasMore}
+					<a href="/search-all/?q={encodeURIComponent(query)}" class="search-more">
+						查看全部 {totalCount} 条结果 →
+					</a>
+				{/if}
 			{:else}
 				<div class="search-empty">
 					<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -297,6 +306,22 @@
 	:global(.dark) .search-highlight {
 		background: #facc15;
 		color: #000;
+	}
+
+	.search-more {
+		display: block;
+		text-align: center;
+		padding: 0.75rem;
+		margin-top: 0.25rem;
+		border-radius: 0.75rem;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--primary);
+		text-decoration: none;
+		transition: background 0.15s;
+	}
+	.search-more:hover {
+		background: color-mix(in oklch, var(--primary) 8%, transparent);
 	}
 
 	.search-empty {

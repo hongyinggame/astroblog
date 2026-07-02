@@ -60,6 +60,8 @@ const bannerPostMeta = {
 const processedImage = processCoverImageSync(entry.data.image, entry.id);
 const apiUrls = getApiUrlList(entry.data.image, entry.id);
 
+const coverBasePath = getFileDirFromPath(entry.filePath || "");
+
 let posterCoverUrl = processedImage;
 if (processedImage) {
 	const isLocal = !(
@@ -69,12 +71,11 @@ if (processedImage) {
 		processedImage.startsWith("data:")
 	);
 	if (isLocal) {
-		const basePath = getFileDirFromPath(entry.filePath || "");
 		const files = import.meta.glob<ImageMetadata>("../../**", {
 			import: "default",
 		});
 		let normalizedPath = path
-			.normalize(path.join("../../", basePath, processedImage))
+			.normalize(path.join("../../", coverBasePath, processedImage))
 			.replace(/\\/g, "/");
 		const file = files[normalizedPath];
 		if (file) {
@@ -249,7 +250,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
             <CoverImage
               id="post-cover"
               src={processedImage}
-              basePath={getFileDirFromPath(entry.filePath || '')}
+              basePath={coverBasePath}
               class="mb-8 rounded-xl banner-container onload-animation"
               preview={false}
               apiUrls={apiUrls}

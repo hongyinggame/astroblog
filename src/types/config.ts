@@ -50,6 +50,17 @@ export type SiteConfig = {
 		theme: "github" | "obsidian" | "vitepress";
 	};
 
+	// 追番配置（Bilibili + TMDB）
+	anime?: {
+		bilibili?: {
+			uid: string; // Bilibili 用户 UID
+		};
+		tmdb?: {
+			apiKey: string; // TMDB API Key
+			listId: string; // TMDB 列表 ID
+		};
+	};
+
 	// bangumi配置
 	bangumi?: {
 		userId?: string; // Bangumi用户ID
@@ -93,9 +104,11 @@ export type SiteConfig = {
 		sponsor: boolean; // 赞助页面开关
 		guestbook: boolean; // 留言板页面开关
 		bangumi: boolean;
+		anime?: boolean; // 追番页面开关
 		gallery: boolean; // 相册页面开关
 		essays?: boolean; // 杂谈页面开关
 		chatters?: boolean; // 说说页面开关
+		library?: boolean; // 档案馆页面开关
 	};
 
 	// 分类导航栏开关
@@ -191,6 +204,8 @@ export enum LinkPreset {
 	Gallery = 7,
 	Tags = 8,
 	Categories = 9,
+	Anime = 10,
+	Library = 11,
 }
 
 export type NavBarLink = {

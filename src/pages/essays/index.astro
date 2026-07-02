@@ -10,21 +10,26 @@ import Live2DWidget from "@/components/features/Live2DWidget.astro";
 import SpineModel from "@/components/features/SpineModel.astro";
 import { getCollection } from "astro:content";
 import type { ImageMetadata } from "astro";
+import { markdownToHtml } from "@/utils/markdown-to-html";
+import "@/styles/moment-list.css";
 
 const allEssays = await getCollection("essays", ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
 });
-const essays = allEssays
-  .sort((a, b) => {
-    if (a.data.pinned && !b.data.pinned) return -1;
-    if (!a.data.pinned && b.data.pinned) return 1;
-    return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
-  })
-  .map((e) => ({
-    id: e.id,
-    data: e.data,
-    body: e.body,
-  }));
+const essays = await Promise.all(
+  allEssays
+    .sort((a, b) => {
+      if (a.data.pinned && !b.data.pinned) return -1;
+      if (!a.data.pinned && b.data.pinned) return 1;
+      return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
+    })
+    .map(async (e) => ({
+      id: e.id,
+      data: e.data,
+      body: e.body,
+      bodyHtml: await markdownToHtml(e.body || ""),
+    }))
+);
 
 const avatarModules = import.meta.glob<ImageMetadata>(
   "/src/assets/images/*.{avif,webp,jpg,jpeg,png}",
@@ -173,4 +178,33 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
+</style>
+<style is:global>
+	/* ── 杂谈卡片内容排版样式（独立于 markdown.css）── */
+	.card-body-text a {
+		position: relative;
+		font-weight: 500;
+		color: var(--primary);
+		text-decoration: underline;
+		text-decoration-color: var(--link-underline);
+		text-decoration-thickness: 1px;
+		text-decoration-style: dashed;
+		text-underline-offset: 4px;
+		word-break: break-word;
+	}
+	.card-body-text a:hover {
+		text-decoration: none;
+		background: var(--btn-plain-bg-hover);
+	}
+
+	.card-body-text code {
+		background: var(--inline-code-bg);
+		color: var(--inline-code-color);
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.375rem;
+		font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	}
+	.card-body-text code::before,
+	.card-body-text code::after { content: none; }
+
 </style>

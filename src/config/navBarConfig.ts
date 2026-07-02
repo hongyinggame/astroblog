@@ -60,7 +60,9 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		icon: "material-symbols:person",
 		children: [
 			...(siteConfig.pages.gallery ? [LinkPreset.Gallery] : []),
+			...(siteConfig.pages.anime ? [LinkPreset.Anime] : []),
 			...(siteConfig.pages.bangumi ? [LinkPreset.Bangumi] : []),
+			...(siteConfig.pages.library ? [LinkPreset.Library] : []),
 		],
 	});
 
@@ -70,6 +72,29 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 
 	// 关于我
 	links.push(LinkPreset.About);
+
+	// 旅行
+	links.push({
+		name: "旅行",
+		url: "/travel/",
+		icon: "material-symbols:explore",
+		children: [
+			{
+				name: "开往",
+				url: "https://foreverblog.cn/go.html",
+				external: true,
+				icon: "material-symbols:train",
+				hideExternalIcon: true,
+			},
+			{
+				name: "虫洞",
+				url: "https://foreverblog.cn/go.html",
+				external: true,
+				icon: "material-symbols:rocket-launch",
+				hideExternalIcon: true,
+			},
+		],
+	});
 
 	return { links } as NavBarConfig;
 };

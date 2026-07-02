@@ -327,6 +327,45 @@ export const en: Translation = {
 	[Key.galleryBackToAlbums]: "Back to albums",
 	[Key.searchAlbums]: "Search albums...",
 
+	// Anime Tracking
+	[Key.anime]: "Anime",
+	[Key.animeSubtitle]: "My anime tracking list, data from Bilibili and TMDB",
+	[Key.animeTotal]: "Total",
+	[Key.animeAverageRating]: "Avg Rating",
+	[Key.animeSearch]: "Search anime...",
+	[Key.animeAllTypes]: "All",
+	[Key.animeTV]: "TV Anime",
+	[Key.animeMovie]: "Movie",
+	[Key.animeRatingDesc]: "Highest Rating",
+	[Key.animeRatingAsc]: "Lowest Rating",
+	[Key.animeDateDesc]: "Newest",
+	[Key.animeDateAsc]: "Oldest",
+	[Key.animeNoResults]: "No matching anime found",
+	[Key.animeLastUpdated]: "Data updated at",
+	[Key.animeSource]: "Source",
+	[Key.animeEpStatus]: "Progress",
+	[Key.animeViewDetails]: "View Details",
+	[Key.animeNotConfigured]: "Anime data source not configured",
+	[Key.animeNotConfiguredDesc]:
+		"Please configure Bilibili UID or TMDB API Key to display anime tracking data.",
+	[Key.animeBilibiliAvg]: "Bilibili Avg",
+	[Key.animeTmdbAvg]: "TMDB Avg",
+	[Key.animeDualSynced]: "Dual Synced",
+	[Key.animeNoOverview]: "No synopsis available",
+	[Key.animeClose]: "Close",
+	[Key.animeSynopsis]: "Synopsis",
+	[Key.animeWatchNow]: "Watch Now",
+	[Key.animeViewTmdb]: "View TMDB Details",
+	[Key.animeAllWithCount]: "All ({count})",
+	[Key.animeTVWithCount]: "TV ({count})",
+	[Key.animeMovieWithCount]: "Movie ({count})",
+	[Key.animeTypeAnime]: "Anime",
+	[Key.animeTypeMovie]: "Movie",
+	[Key.animeTypeDocumentary]: "Documentary",
+	[Key.animeTypeChinese]: "Chinese Animation",
+	[Key.animeTypeDrama]: "Drama",
+	[Key.animeTypeConcert]: "Concert",
+
 	// Password Protection
 	[Key.passwordProtected]: "Password Protected",
 	[Key.passwordProtectedDesc]:
@@ -335,6 +374,20 @@ export const en: Translation = {
 	[Key.passwordPlaceholder]: "Enter password",
 	[Key.passwordSubmit]: "Unlock",
 	[Key.passwordError]: "Incorrect password, please try again.",
-	[Key.passwordProtectedRss]:
+	[Key.travellings]: "Travellings",
+
+		[Key.passwordProtectedRss]:
 		"This article is encrypted. Please visit the website to view it.",
+
+	[Key.library]: "Library",
+	[Key.libraryDescription]: "A collection of books and films I have enjoyed",
+	[Key.libraryBooks]: "Books",
+	[Key.libraryFilms]: "Films & TV",
+	[Key.librarySortDate]: "Date",
+	[Key.librarySortRating]: "Rating",
+	[Key.librarySortTitle]: "Title",
+	[Key.librarySortAsc]: "Ascending",
+	[Key.librarySortDesc]: "Descending",
+	[Key.libraryRatingGuide]: "Rating Guide",
+	[Key.libraryEmpty]: "No items yet",
 };

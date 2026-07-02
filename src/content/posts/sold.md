@@ -8,7 +8,7 @@ tags:
 - 旧文件
 category: 文章示例
 draft: false
-image: ./images/firefly2.avif
+image: /images/firefly2.avif
 ---
 
 &emsp;&emsp;语言描述了事实但也掩盖了真相；无言行动以复；

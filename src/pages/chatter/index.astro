@@ -10,21 +10,26 @@ import Live2DWidget from "@/components/features/Live2DWidget.astro";
 import SpineModel from "@/components/features/SpineModel.astro";
 import { getCollection } from "astro:content";
 import type { ImageMetadata } from "astro";
+import { markdownToHtml } from "@/utils/markdown-to-html";
+import "@/styles/moment-list.css";
 
 const allChatters = await getCollection("chatters", ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
 });
-const chatters = allChatters
-  .sort((a, b) => {
-    if (a.data.pinned && !b.data.pinned) return -1;
-    if (!a.data.pinned && b.data.pinned) return 1;
-    return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
-  })
-  .map((c) => ({
-    id: c.id,
-    data: c.data,
-    body: c.body,
-  }));
+const chatters = await Promise.all(
+  allChatters
+    .sort((a, b) => {
+      if (a.data.pinned && !b.data.pinned) return -1;
+      if (!a.data.pinned && b.data.pinned) return 1;
+      return new Date(b.data.published).getTime() - new Date(a.data.published).getTime();
+    })
+    .map(async (c) => ({
+      id: c.id,
+      data: c.data,
+      body: c.body,
+      bodyHtml: await markdownToHtml(c.body || ""),
+    }))
+);
 
 const avatarModules = import.meta.glob<ImageMetadata>(
   "/src/assets/images/*.{avif,webp,jpg,jpeg,png}",
@@ -169,4 +174,149 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
+
+
+	[data-chatter-card] {
+		border-radius: 1.5rem 1.5rem 1.5rem 0.25rem;
+		border-color: rgba(255,255,255,0.55);
+	}
+	.dark [data-chatter-card] {
+		border-color: rgba(255,255,255,0.12);
+	}
+	@media (min-width: 768px) {
+		[data-chatter-card] {
+			border-radius: 2.25rem 2.25rem 2.25rem 0.35rem;
+		}
+	}
+	@media (min-width: 1024px) {
+		[data-chatter-card] {
+			border-radius: 2.5rem 2.5rem 2.5rem 0.4rem;
+		}
+	}
+
+	[data-chatter-accent] {
+		height: 3px;
+		width: 2.5rem;
+		border-radius: 9999px;
+		background: linear-gradient(to right, var(--primary), #f472b6, #fbbf24);
+		margin: 0.25rem 0 0.5rem;
+		opacity: 0.7;
+	}
+
+	[data-chatter-divider] {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0.25rem 0 0.75rem;
+		font-size: 0.55rem;
+		color: var(--primary);
+		opacity: 0.35;
+	}
+	[data-chatter-divider]::before,
+	[data-chatter-divider]::after {
+		content: "";
+		flex: 1;
+		height: 1px;
+		border-radius: 1px;
+	}
+	[data-chatter-divider]::before {
+		background: linear-gradient(to right, transparent, color-mix(in oklch, var(--primary) 30%, transparent));
+	}
+	[data-chatter-divider]::after {
+		background: linear-gradient(to right, color-mix(in oklch, #f472b6 30%, transparent), transparent);
+	}
+
+	/* ── 说说卡片内容排版样式（独立于 markdown.css）── */
+	[data-full-content] a:not(.no-styling) {
+		position: relative;
+		background: none;
+		font-weight: 500;
+		color: var(--primary);
+		text-decoration: underline;
+		text-decoration-color: var(--link-underline);
+		text-decoration-thickness: 1px;
+		text-decoration-style: dashed;
+		text-underline-offset: 4px;
+		word-break: break-word;
+	}
+	[data-full-content] a:not(.no-styling):hover {
+		text-decoration: none;
+		background: var(--btn-plain-bg-hover);
+		border-bottom: 1px dashed var(--link-hover);
+	}
+
+	[data-full-content] code {
+		background: var(--inline-code-bg);
+		color: var(--inline-code-color);
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.375rem;
+		font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	}
+	[data-full-content] code::before,
+	[data-full-content] code::after { content: none; }
+
+	[data-full-content] blockquote {
+		font-style: normal;
+		border-color: transparent;
+		position: relative;
+		font-weight: inherit;
+	}
+	[data-full-content] blockquote::before {
+		content: "";
+		position: absolute;
+		left: -0.25rem;
+		display: block;
+		background: var(--btn-regular-bg);
+		height: 100%;
+		width: 0.25rem;
+		border-radius: 9999px;
+	}
+	[data-full-content] blockquote p::before,
+	[data-full-content] blockquote p::after { content: none; }
+
+	[data-full-content] ul li::marker,
+	[data-full-content] ol li::marker {
+		color: var(--primary);
+	}
+
+	[data-full-content] img {
+		border-radius: 0.75rem;
+	}
+
+	[data-full-content] hr {
+		border-color: var(--line-divider);
+		border-style: dashed;
+	}
+
+	[data-full-content] table {
+		border-collapse: separate;
+		border-spacing: 0;
+		border-radius: calc(var(--radius-large) - 0.5rem);
+		overflow: hidden;
+		margin: 1rem 0;
+		width: 100%;
+	}
+	[data-full-content] th {
+		background: var(--btn-regular-bg);
+		font-weight: 600;
+		color: var(--btn-content);
+		border-bottom: 1px solid var(--line-color);
+	}
+	[data-full-content] td {
+		background: var(--card-bg);
+	}
+	[data-full-content] tr:nth-child(even) td {
+		background: var(--btn-plain-bg-active);
+	}
+	[data-full-content] th,
+	[data-full-content] td {
+		padding: 0.5rem 0.75rem;
+		text-align: left;
+		word-break: break-word;
+	}
+	[data-full-content] th:not(:last-child),
+	[data-full-content] td:not(:last-child) {
+		border-right: 1px solid var(--line-color);
+	}
+
 </style>

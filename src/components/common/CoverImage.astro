@@ -65,12 +65,26 @@ if (isLocal) {
 	const normalizedPath = path
 		.normalize(path.join("../../", basePath, src))
 		.replace(/\\/g, "/");
-	const file = files[normalizedPath];
+	let file = files[normalizedPath];
+
+	// Fallback: search by matching path suffix (handles basePath edge cases)
+	if (!file) {
+		const cleanSrc = src.replace(/^\.\//, "");
+		const suffix = basePath
+			? `${basePath}/${cleanSrc}`.replace(/\/+/g, "/")
+			: cleanSrc;
+		const match = Object.entries(files).find(([k]) =>
+			k.endsWith(suffix),
+		);
+		if (match) file = match[1];
+	}
+
 	if (file) {
 		img = await file();
 	} else {
+		const cleanSrc = src.replace(/^\.\//, "");
 		console.error(
-			`[ERROR] Image not found: ${normalizedPath.replace("../../", "src/")}`,
+			`[ERROR] Image not found: src="${cleanSrc}", basePath="${basePath}"`,
 		);
 	}
 }

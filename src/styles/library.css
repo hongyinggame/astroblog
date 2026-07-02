@@ -1,0 +1,440 @@
+/* ============================================
+ * 档案馆页面 - 玻璃拟态卡片样式
+ * ============================================ */
+
+/* ---- 页面容器 ---- */
+[data-library-page] .moment-page {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+@media (min-width: 768px) {
+  [data-library-page] .moment-page {
+    padding: 2rem;
+  }
+}
+
+/* ---- 页面标题 ---- */
+[data-library-page] .page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+[data-library-page] .page-title {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #fff;
+}
+[data-library-page] .page-sub {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.65);
+}
+
+/* ---- 标签导航栏 ---- */
+[data-library-page] .tab-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+[data-library-page] .tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(16px);
+  color: #7b6eaa;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dark [data-library-page] .tab-btn {
+  background: rgba(30,41,59,0.4);
+  border-color: rgba(255,255,255,0.08);
+  color: #b8a8d8;
+}
+[data-library-page] .tab-btn:hover {
+  background: rgba(255,255,255,0.5);
+  color: #8b5cf6;
+  border-color: rgba(255,255,255,0.5);
+}
+.dark [data-library-page] .tab-btn:hover {
+  background: rgba(30,41,59,0.55);
+  color: #c4b5e4;
+}
+[data-library-page] .tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+[data-library-page] .tab-icon {
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+[data-library-page] .tab-btn.active .tab-icon {
+  opacity: 1;
+}
+[data-library-page] .tab-count {
+  font-size: 0.75rem;
+  background: rgba(0,0,0,0.1);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+.dark [data-library-page] .tab-count {
+  background: rgba(255,255,255,0.15);
+}
+[data-library-page] .tab-btn.active .tab-count {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ---- 评级说明面板 ---- */
+[data-library-page] .rating-guide {
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 1.25rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+}
+.dark [data-library-page] .rating-guide {
+  background: rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* ---- 排序控件 ---- */
+[data-library-page] .sort-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+[data-library-page] .search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 16rem;
+}
+[data-library-page] .search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  pointer-events: none;
+}
+[data-library-page] .search-input {
+  width: 100%;
+  padding: 0.45rem 1rem 0.45rem 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(16px);
+  font-size: 0.8rem;
+  color: #fff;
+  outline: none;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-library-page] .search-input::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+.dark [data-library-page] .search-input {
+  background: rgba(30,41,59,0.4);
+  border-color: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+[data-library-page] .search-input:focus {
+  border-color: rgba(139,92,246,0.6);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+  background: rgba(255,255,255,0.45);
+}
+.dark [data-library-page] .search-input:focus {
+  background: rgba(30,41,59,0.55);
+}
+
+[data-library-page] .sort-select {
+  appearance: none;
+  background: linear-gradient(135deg, #7c3aed, #c026d3);
+  border: none;
+  border-radius: 9999px;
+  padding: 0.45rem 2rem 0.45rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  box-shadow: 0 4px 16px rgba(139,92,246,0.35);
+}
+[data-library-page] .sort-select:hover {
+  background: linear-gradient(135deg, #8b5cf6, #d946ef);
+  box-shadow: 0 6px 22px rgba(139,92,246,0.5);
+  transform: translateY(-1px);
+}
+[data-library-page] .sort-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.4), 0 6px 22px rgba(139,92,246,0.5);
+}
+/* 下拉选项列表 */
+[data-library-page] .sort-select option {
+  background: #8b7baa;
+  color: #fff;
+  padding: 0.5rem 1rem;
+}
+
+/* ---- 卡片网格 ---- */
+[data-library-page] .library-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+[data-library-page] .list-card {
+  display: flex;
+  flex-direction: row;
+  border-radius: 1.25rem !important;
+}
+[data-library-page] .list-cover {
+  width: 6rem;
+  min-width: 6rem;
+  aspect-ratio: auto !important;
+}
+@media (min-width: 768px) {
+  [data-library-page] .list-cover {
+    width: 7.5rem;
+    min-width: 7.5rem;
+  }
+}
+[data-library-page] .list-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 1rem !important;
+}
+[data-library-page] .list-label {
+  color: #c0b0dc;
+  font-size: 0.7rem;
+}
+@media (min-width: 640px) {
+  [data-library-page] .library-card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  [data-library-page] .library-card-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+@media (min-width: 1280px) {
+  [data-library-page] .library-card-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ---- 单张卡片 ---- */
+[data-library-page] .library-card {
+  display: block;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.4);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dark [data-library-page] .library-card {
+  background: rgba(30,41,59,0.45);
+  border-color: rgba(255,255,255,0.1);
+}
+
+[data-library-page] .library-card {
+  border-radius: 1.25rem 1.25rem 1.25rem 0.2rem;
+}
+@media (min-width: 768px) {
+  [data-library-page] .library-card {
+    border-radius: 2rem 2rem 2rem 0.25rem;
+  }
+}
+
+[data-library-page] .library-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  border-color: rgba(255,255,255,0.6);
+}
+.dark [data-library-page] .library-card:hover {
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  border-color: rgba(255,255,255,0.18);
+}
+
+/* ---- 卡片封面区域 ---- */
+[data-library-page] .library-card-cover {
+  position: relative;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  background: rgba(0,0,0,0.05);
+}
+.dark [data-library-page] .library-card-cover {
+  background: rgba(0,0,0,0.15);
+}
+
+/* 评级角标 */
+[data-library-page] .rating-badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+[data-library-page] .rating-badge.ss { background: linear-gradient(135deg, rgba(139,92,246,0.9), rgba(168,85,247,0.9)); color: #fff; }
+[data-library-page] .rating-badge.s  { background: rgba(245,158,11,0.9); color: #fff; }
+[data-library-page] .rating-badge.a  { background: rgba(34,197,94,0.9); color: #fff; }
+[data-library-page] .rating-badge.b  { background: rgba(59,130,246,0.9); color: #fff; }
+[data-library-page] .rating-badge.c  { background: rgba(107,114,128,0.85); color: #fff; }
+[data-library-page] .rating-badge.d  { background: rgba(239,68,68,0.9); color: #fff; }
+
+	/* 类型角标（右上角） */
+	[data-library-page] .type-badge {
+	  position: absolute;
+	  top: 0.6rem;
+	  right: 0.6rem;
+	  z-index: 10;
+	  display: inline-flex;
+	  align-items: center;
+	  padding: 0.15rem 0.5rem;
+	  border-radius: 0.45rem;
+	  font-size: 0.7rem;
+	  font-weight: 700;
+	  background: linear-gradient(135deg, rgba(139,92,246,0.8), rgba(236,72,153,0.8));
+	  backdrop-filter: blur(8px);
+	  color: #fff;
+	  box-shadow: 0 2px 10px rgba(139,92,246,0.35);
+	}
+
+	/* 内联小型评级角标（详情页标题旁） */
+	.rating-badge-sm {
+	  display: inline-flex;
+	  align-items: center;
+	  padding: 0.15rem 0.5rem;
+	  border-radius: 0.45rem;
+	  font-size: 0.8rem;
+	  font-weight: 800;
+	  color: #fff;
+	  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+	}
+	.rating-badge-sm.ss { background: linear-gradient(135deg, rgba(139,92,246,0.9), rgba(168,85,247,0.9)); }
+	.rating-badge-sm.s  { background: rgba(245,158,11,0.9); }
+	.rating-badge-sm.a  { background: rgba(34,197,94,0.9); }
+	.rating-badge-sm.b  { background: rgba(59,130,246,0.9); }
+	.rating-badge-sm.c  { background: rgba(107,114,128,0.85); }
+	.rating-badge-sm.d  { background: rgba(239,68,68,0.9); }
+
+	.type-badge-sm {
+	  display: inline-flex;
+	  align-items: center;
+	  padding: 0.15rem 0.5rem;
+	  border-radius: 0.45rem;
+	  font-size: 0.7rem;
+	  font-weight: 700;
+	  background: linear-gradient(135deg, rgba(139,92,246,0.8), rgba(236,72,153,0.8));
+	  color: #fff;
+	  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+	}
+
+/* 封面图片 */
+[data-library-page] .library-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+[data-library-page] .library-card:hover .library-card-cover img {
+  transform: scale(1.06);
+}
+
+/* 封面占位 */
+[data-library-page] .cover-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-text);
+  opacity: 0.3;
+}
+
+/* ---- 卡片底部信息 ---- */
+[data-library-page] .library-card-info {
+  padding: 0.75rem 0.875rem 0.875rem;
+}
+[data-library-page] .library-card-info .title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #d5c8f0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+[data-library-page] .library-card:hover .title {
+  color: #e8ddf8;
+}
+[data-library-page] .library-card-info .meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #c0b0dc;
+}
+[data-library-page] .library-card-info .meta .tag {
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.45rem;
+  border-radius: 9999px;
+  background: rgba(0,0,0,0.06);
+  color: var(--secondary-text);
+}
+.dark [data-library-page] .library-card-info .meta .tag {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ---- 卡片底部分隔线 ---- */
+[data-library-page] .card-divider {
+  height: 3px;
+  width: 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--primary), #f472b6, #fbbf24);
+  margin: 0.25rem 0 0.5rem;
+  opacity: 0.6;
+}
+
+/* ---- 空状态 ---- */
+[data-library-page] .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 1.5rem;
+}
+.dark [data-library-page] .empty-state {
+  background: rgba(30,41,59,0.35);
+  border-color: rgba(255,255,255,0.08);
+}

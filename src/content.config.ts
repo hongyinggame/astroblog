@@ -66,9 +66,36 @@ const essaysCollection = defineCollection({
 	}),
 });
 
+
+const booksCollection = defineCollection({
+	loader: glob({ pattern: "**/*.md", base: "./src/content/books" }),
+	schema: z.object({
+		title: z.string(),
+		published: z.date(),
+		rating: z.number().min(0).max(10),
+		cover: z.string(),
+		author: z.string().optional(),
+		type: z.enum(["小说", "散文", "诗歌", "戏剧"]).optional(),
+	}),
+});
+
+const filmsCollection = defineCollection({
+	loader: glob({ pattern: "**/*.md", base: "./src/content/films" }),
+	schema: z.object({
+		title: z.string(),
+		published: z.date(),
+		rating: z.number().min(0).max(10),
+		cover: z.string(),
+		type: z.enum(["movie", "tv"]).optional(),
+	}),
+});
+
+
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
 	chatters: chattersCollection,
 	essays: essaysCollection,
+	books: booksCollection,
+	films: filmsCollection,
 };

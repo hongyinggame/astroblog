@@ -338,4 +338,16 @@ export const ru: Translation = {
 	[Key.passwordError]: "Неверный пароль, попробуйте снова.",
 	[Key.passwordProtectedRss]:
 		"Эта статья зашифрована. Пожалуйста, посетите сайт для просмотра.",
+
+	[Key.library]: "Архив",
+	[Key.libraryDescription]: "Коллекция прочитанных книг и просмотренных фильмов",
+	[Key.libraryBooks]: "Книги",
+	[Key.libraryFilms]: "Фильмы и сериалы",
+	[Key.librarySortDate]: "Дата",
+	[Key.librarySortRating]: "Оценка",
+	[Key.librarySortTitle]: "Название",
+	[Key.librarySortAsc]: "По возрастанию",
+	[Key.librarySortDesc]: "По убыванию",
+	[Key.libraryRatingGuide]: "Система оценок",
+	[Key.libraryEmpty]: "Пока ничего нет",
 };
