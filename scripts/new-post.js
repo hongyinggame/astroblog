@@ -1,4 +1,4 @@
-/* Create new post / chatter / essay markdown file with front-matter */
+/* Create new post / chatter / essay / book / film markdown file with front-matter */
 
 import fs from "fs"
 import path from "path"
@@ -26,7 +26,9 @@ if (args.length === 0) {
   console.error(`用法:
   pnpm new-post <文件名>                    创建文章 (posts)
   pnpm new-post <文件名> --type chatter     创建说说 (chatters)
-  pnpm new-post <文件名> --type essay       创建杂谈 (essays)`)
+  pnpm new-post <文件名> --type essay       创建杂谈 (essays)
+  pnpm new-post <文件名> --type book        创建图书 (books)
+  pnpm new-post <文件名> --type film        创建影视 (films)`)
   process.exit(1)
 }
 
@@ -76,11 +78,36 @@ tags: []
 ---
 `,
   },
+  book: {
+    dir: "./src/content/books/",
+    label: "图书",
+    template: (title) => `---
+title: ${title}
+published: ${getDate()}
+rating: 0
+cover: ''
+author: ''
+type: 小说
+---
+`,
+  },
+  film: {
+    dir: "./src/content/films/",
+    label: "影视",
+    template: (title) => `---
+title: ${title}
+published: ${getDate()}
+rating: 0
+cover: ''
+type: movie
+---
+`,
+  },
 }
 
 const config = typeConfig[type]
 if (!config) {
-  console.error(`Error: 未知类型 "${type}"，可选: post, chatter, essay`)
+  console.error(`Error: 未知类型 "${type}"，可选: post, chatter, essay, book, film`)
   process.exit(1)
 }
 

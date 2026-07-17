@@ -254,7 +254,7 @@ if (isLocalSrcLogo) {
         }
     }
 
-    document.addEventListener('swup:contentReplaced', function () {
+    document.addEventListener('astro:after-swap', function () {
         // 延迟一帧让浏览器索引新 DOM，再延迟 50ms 作为兜底
         requestAnimationFrame(function () {
             syncIconAfterNav();
@@ -286,7 +286,7 @@ if (isLocalSrcLogo) {
             else { seen[id] = true; }
         });
     }
-    document.addEventListener('swup:contentReplaced', cleanupDuplicateNavbar);
+    document.addEventListener('astro:after-swap', cleanupDuplicateNavbar);
 })();
 
 // 为semifull模式添加滚动检测逻辑

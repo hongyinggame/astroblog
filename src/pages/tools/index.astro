@@ -1,0 +1,146 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+
+const tools = [
+  {
+    name: "获取Bing壁纸",
+    description: "获取必应每日壁纸高清原图，支持多种分辨率下载",
+    url: "/tools/bing-wallpaper/",
+    icon: "material-symbols:wallpaper",
+    category: "图像",
+  },
+  {
+    name: "白噪音",
+    description: "在线白噪音生成器，支持白噪音、粉噪音、棕噪音，帮助专注和放松",
+    url: "/tools/white-noise/",
+    icon: "material-symbols:headphones",
+    category: "音频",
+  },
+  {
+    name: "番茄时钟",
+    description: "番茄工作法计时器，支持专注、短休息、长休息三种模式",
+    url: "/tools/pomodoro/",
+    icon: "material-symbols:timer",
+    category: "学习",
+  },
+  {
+    name: "烟花模拟",
+    description: "Canvas 烟花粒子特效，点击或自动发射，支持全屏沉浸",
+    url: "/tools/fireworks/",
+    icon: "material-symbols:celebration",
+    category: "娱乐",
+  },
+];
+
+const allCategories = [...new Set(tools.map((t) => t.category))];
+---
+
+<MainGridLayout title="工具" description="实用工具集合">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+      <div class="mb-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+            <Icon name="material-symbols:build-circle" class="text-[1.5rem]" />
+          </div>
+          <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+            工具
+          </div>
+        </div>
+        <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+          实用工具集合
+        </p>
+      </div>
+
+      <!-- 分类标签筛选 -->
+      <tool-filter class="mb-6">
+        <div class="flex flex-wrap gap-2">
+          <button
+            data-category="all"
+            class="px-3 py-1.5 rounded-lg bg-(--primary) text-white hover:bg-(--primary) transition-colors duration-200 text-sm font-medium"
+          >
+            全部
+          </button>
+          {allCategories.map((cat) => (
+            <button
+              data-category={cat}
+              class="px-3 py-1.5 rounded-lg bg-(--btn-regular-bg) text-(--btn-content) hover:bg-(--btn-regular-bg-hover) transition-colors duration-200 text-sm font-medium"
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </tool-filter>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {tools.map((tool) => (
+          <a
+            href={tool.url}
+            target="_blank" rel="noopener noreferrer"
+            data-category={tool.category}
+            class="tool-card group flex flex-col gap-3 p-5 rounded-xl border border-(--line-divider) hover:border-(--primary) hover:bg-(--card-bg) transition-all duration-300 hover:shadow-lg relative overflow-hidden"
+          >
+            <div class="absolute inset-0 bg-(--primary) opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none" />
+            <div class="h-10 w-10 rounded-lg bg-(--primary)/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Icon name={tool.icon} class="text-[1.5rem] text-(--primary)" />
+            </div>
+            <div>
+              <div class="font-bold text-base text-neutral-900 dark:text-neutral-100 group-hover:text-(--primary) transition-colors">
+                {tool.name}
+              </div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                {tool.description}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</MainGridLayout>
+
+<script slot="head" is:inline>
+  if (!customElements.get("tool-filter")) {
+    class ToolFilter extends HTMLElement {
+      selectedCategory = "all";
+
+      connectedCallback() {
+        this.addEventListener("click", this.handleClick);
+      }
+
+      disconnectedCallback() {
+        this.removeEventListener("click", this.handleClick);
+      }
+
+      handleClick(e) {
+        const button = e.target.closest("button");
+        if (!button) return;
+
+        this.selectedCategory = button.dataset.category;
+        const buttons = this.querySelectorAll("button");
+        buttons.forEach((btn) => {
+          btn.classList.remove("bg-(--primary)", "text-white");
+          btn.classList.add("bg-(--btn-regular-bg)", "text-(--btn-content)", "hover:bg-(--btn-regular-bg-hover)");
+          if (btn === button) {
+            btn.classList.remove("bg-(--btn-regular-bg)", "text-(--btn-content)", "hover:bg-(--btn-regular-bg-hover)");
+            btn.classList.add("bg-(--primary)", "text-white");
+          }
+        });
+
+        const container = this.closest(".card-base");
+        if (!container) return;
+        const cards = container.querySelectorAll(".tool-card");
+        cards.forEach((card) => {
+          const el = card;
+          if (this.selectedCategory === "all" || el.dataset.category === this.selectedCategory) {
+            el.style.display = "";
+          } else {
+            el.style.display = "none";
+          }
+        });
+      }
+    }
+    customElements.define("tool-filter", ToolFilter);
+  }
+</script>

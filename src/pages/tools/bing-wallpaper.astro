@@ -1,0 +1,129 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+
+interface BingImage {
+  urlbase: string;
+  copyright: string;
+  title: string;
+  url: string;
+}
+
+let images: BingImage[] = [];
+let error: string | null = null;
+
+try {
+  const response = await fetch(
+    "https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1"
+  );
+  const data = await response.json();
+  images = (data.images || []).map((img: any) => ({
+    urlbase: img.urlbase,
+    copyright: img.copyright || "",
+    title: img.title || "",
+    url: `https://cn.bing.com${img.url}`,
+  }));
+} catch (e) {
+  error = "获取Bing壁纸失败，请稍后重试";
+}
+
+const resolutions = ["1920x1080", "1366x768", "1080x1920", "768x1366"];
+const currentImage = images[0];
+---
+
+<MainGridLayout title="获取Bing壁纸" description="获取必应每日壁纸高清原图">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+      <div class="mb-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+            <Icon name="material-symbols:wallpaper" class="text-[1.5rem]" />
+          </div>
+          <div class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+            获取Bing壁纸
+          </div>
+        </div>
+      </div>
+
+      {error ? (
+        <div class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500">
+          <Icon name="material-symbols:error-outline" class="text-4xl mb-3" />
+          <div class="text-sm">{error}</div>
+        </div>
+      ) : currentImage ? (
+        <div>
+          <!-- 壁纸预览 -->
+          <div class="relative rounded-xl overflow-hidden mb-4 border border-(--line-divider)">
+            <img
+              src={currentImage.url}
+              alt={currentImage.title || "Bing每日壁纸"}
+              class="w-full h-auto"
+              loading="eager"
+            />
+          </div>
+
+          <!-- 版权信息 -->
+          {currentImage.copyright && (
+            <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+              {currentImage.copyright}
+            </p>
+          )}
+
+          <!-- 下载按钮 -->
+          <div class="mb-4">
+            <div class="text-base font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
+              下载壁纸
+            </div>
+            <div class="flex flex-wrap gap-3">
+              {resolutions.map((res) => {
+                const downloadUrl = `https://cn.bing.com${currentImage.urlbase}_${res}.jpg`;
+                const [w, h] = res.split("x");
+                return (
+                  <a
+                    href={downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-(--line-divider) hover:border-(--primary) hover:bg-(--primary)/5 transition-all duration-200 text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                  >
+                    <Icon name="material-symbols:download" class="text-lg" />
+                    <span>{res}</span>
+                    <span class="text-xs text-neutral-400">({w}x{h})</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
+          <!-- 原始文件下载 -->
+          <div>
+            <a
+              href={`https://cn.bing.com${currentImage.urlbase}_UHD.jpg`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-(--primary) text-white hover:opacity-90 transition-all duration-200 text-sm font-medium"
+            >
+              <Icon name="material-symbols:download" class="text-lg" />
+              下载UHD原图
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div class="flex flex-col items-center justify-center py-16 text-neutral-400">
+          <Icon name="material-symbols:image-not-supported-outline" class="text-4xl mb-3" />
+          <div class="text-sm">暂无壁纸数据</div>
+        </div>
+      )}
+
+      <!-- 返回工具页 -->
+      <div class="mt-8 pt-4 border-t border-(--line-divider)">
+        <a
+          href="/tools/"
+          class="inline-flex items-center gap-1.5 text-sm text-(--primary) hover:underline"
+        >
+          <Icon name="material-symbols:arrow-back" class="text-base" />
+          返回工具列表
+        </a>
+      </div>
+    </div>
+  </div>
+</MainGridLayout>

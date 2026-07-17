@@ -13,6 +13,7 @@ import { backgroundWallpaper, live2dWidgetConfig, siteConfig } from "@/config";
 import { Icon } from "astro-icon/components";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import Footer from "@/components/layout/Footer.astro";
 import "@/styles/moment-list.css";
 
 export async function getStaticPaths() {
@@ -284,6 +285,7 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 
   <SpineModel></SpineModel>
   {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  <Footer />
   </div>
   <div id="right-sidebar-dynamic" style="display:none"></div>
   <div id="floating-toc-wrapper" style="display:none"></div>

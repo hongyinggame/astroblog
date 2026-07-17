@@ -955,7 +955,7 @@ function disableAnimation() {
 
       // 跨布局导航: 独立页面(说说/杂谈/音乐/首页/相册详情)与框架页面 DOM 结构不同,
       // Swup 部分替换会造成结构错乱, 必须强制全页刷新
-      const standalonePrefixes = ["/chatter/", "/essays/", "/music/"];
+      const standalonePrefixes = ["/chatter/", "/essays/", "/music/", "/library/"];
       const isGalleryAlbum = targetPathname.startsWith("/gallery/") && targetPathname !== "/gallery/";
       const isStandaloneTarget = targetPathname === "/" || isGalleryAlbum || standalonePrefixes.some((p) => targetPathname.startsWith(p));
       const currentIsStandalone = document.body.classList.contains("is-standalone");
@@ -1005,20 +1005,25 @@ function disableAnimation() {
             }
       }
 
-      // 桌面端全屏壁纸模式：壁纸始终可见，内容用 relative 定位紧跟壁纸
-      if (!isMobileForBanner && currentMode === "fullscreen" && mainEl) {
-        mainEl.style.position = "relative";
-        mainEl.style.zIndex = "30";
-        mainEl.style.setProperty("top", "0", "important");
-        mainEl.style.setProperty("margin-top", "1rem", "important");
-      }
-
-      // 桌面端横幅模式：统一用banner高度定位，不改变grid transform
-      if (!isMobileForBanner && currentMode === "banner" && mainEl) {
-        mainEl.style.setProperty("top", "calc(var(--banner-height) - 3rem)", "important");
-        mainEl.style.position = "";
-        mainEl.style.zIndex = "";
-        mainEl.style.setProperty("margin-top", "0", "important");
+      // 桌面端壁纸模式：确保壁纸可见 + 内容定位
+      if (!isMobileForBanner && (currentMode === "banner" || currentMode === "fullscreen")) {
+        const wrapper = document.getElementById("wallpaper-wrapper");
+        if (wrapper) {
+          wrapper.style.display = "";
+          wrapper.classList.remove("mobile-hide-banner");
+        }
+        if (currentMode === "fullscreen" && mainEl) {
+          mainEl.style.position = "relative";
+          mainEl.style.zIndex = "30";
+          mainEl.style.setProperty("top", "0", "important");
+          mainEl.style.setProperty("margin-top", "1rem", "important");
+        }
+        if (currentMode === "banner" && mainEl) {
+          mainEl.style.setProperty("top", "calc(var(--banner-height) - 3rem)", "important");
+          mainEl.style.position = "";
+          mainEl.style.zIndex = "";
+          mainEl.style.setProperty("margin-top", "0", "important");
+        }
       }
 
       // 更新侧边栏组件的可见性（根据新页面的 URL）
@@ -1068,7 +1073,7 @@ function disableAnimation() {
         try { return new URL(visit.to.url, window.location.href).pathname; }
         catch { return visit.to.url; }
       })();
-      const standalonePrefixes = ["/chatter/", "/essays/", "/music/"];
+      const standalonePrefixes = ["/chatter/", "/essays/", "/music/", "/library/"];
       const isGalleryAlbum = targetPathname.startsWith("/gallery/") && targetPathname !== "/gallery/";
       const isStandaloneTarget = targetPathname === "/" || isGalleryAlbum || standalonePrefixes.some((p) => targetPathname.startsWith(p));
       const currentIsStandalone = document.body.classList.contains("is-standalone");
@@ -1254,6 +1259,12 @@ function disableAnimation() {
       updateMainGridCols();
       updateSidebarComponentsVisibility();
 
+      // 清除上一页 link:click 可能遗留的 navbar-hidden，确保导航栏可见
+      const navbarWrapperEl = document.getElementById("navbar-wrapper");
+      if (navbarWrapperEl) {
+        navbarWrapperEl.classList.remove("navbar-hidden");
+      }
+
       // hide the temp high element when the transition is done
       const heightExtend = document.getElementById("page-height-extend");
       if (heightExtend) {
@@ -1294,20 +1305,25 @@ function disableAnimation() {
           }
       }
 
-      // 桌面端全屏壁纸模式：壁纸始终可见，内容用 relative 定位紧跟壁纸
-      if (!isMobileForBanner && currentMode === "fullscreen" && mainEl) {
-        mainEl.style.position = "relative";
-        mainEl.style.zIndex = "30";
-        mainEl.style.setProperty("top", "0", "important");
-        mainEl.style.setProperty("margin-top", "1rem", "important");
-      }
-
-      // 桌面端横幅模式：统一用banner高度定位，不改变grid transform
-      if (!isMobileForBanner && currentMode === "banner" && mainEl) {
-        mainEl.style.setProperty("top", "calc(var(--banner-height) - 3rem)", "important");
-        mainEl.style.position = "";
-        mainEl.style.zIndex = "";
-        mainEl.style.setProperty("margin-top", "0", "important");
+      // 桌面端壁纸模式：确保壁纸可见 + 内容定位
+      if (!isMobileForBanner && (currentMode === "banner" || currentMode === "fullscreen")) {
+        // 确保壁纸 wrapper 可见（Swup 导航中可能被遗留的 display:none 或 mobile-hide-banner 影响）
+        if (wrapper) {
+          wrapper.style.display = "";
+          wrapper.classList.remove("mobile-hide-banner");
+        }
+        if (currentMode === "fullscreen" && mainEl) {
+          mainEl.style.position = "relative";
+          mainEl.style.zIndex = "30";
+          mainEl.style.setProperty("top", "0", "important");
+          mainEl.style.setProperty("margin-top", "1rem", "important");
+        }
+        if (currentMode === "banner" && mainEl) {
+          mainEl.style.setProperty("top", "calc(var(--banner-height) - 3rem)", "important");
+          mainEl.style.position = "";
+          mainEl.style.zIndex = "";
+          mainEl.style.setProperty("margin-top", "0", "important");
+        }
       }
 
       // 在移动端恢复文章列表容器的过渡动画（在主内容区位置动画完成后）

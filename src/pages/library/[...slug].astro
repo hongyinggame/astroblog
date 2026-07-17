@@ -11,6 +11,7 @@ import Live2DWidget from "@/components/features/Live2DWidget.astro";
 import SpineModel from "@/components/features/SpineModel.astro";
 import { getRatingInfo } from "@/utils/rating-utils";
 import { Icon } from "astro-icon/components";
+import Footer from "@/components/layout/Footer.astro";
 import "@/styles/library.css";
 
 export async function getStaticPaths() {
@@ -236,6 +237,7 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 
   <SpineModel></SpineModel>
   {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  <Footer />
   </div>
   <div id="right-sidebar-dynamic" style="display:none"></div>
   <div id="floating-toc-wrapper" style="display:none"></div>

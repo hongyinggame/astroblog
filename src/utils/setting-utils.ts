@@ -452,7 +452,7 @@ function showBannerMode(animate = false) {
 
 	// 处理移动端非首页主内容区域位置
 	const mainContentWrapper = document.querySelector(
-		".w-full.z-30.pointer-events-none",
+		".w-full.z-30",
 	);
 	if (mainContentWrapper) {
 		const isHomePage = checkIsHomePage(window.location.pathname);
@@ -687,7 +687,7 @@ function adjustMainContentPosition(
 	animate = false,
 ) {
 	const mainContent = document.querySelector(
-		".w-full.z-30.pointer-events-none",
+		".w-full.z-30",
 	) as HTMLElement;
 	if (!mainContent) return;
 
@@ -818,7 +818,7 @@ function adjustMainContentPosition(
 
 function adjustMainContentTransparency(enable: boolean) {
 	const mainContent = document.querySelector(
-		".w-full.z-30.pointer-events-none",
+		".w-full.z-30",
 	);
 	const body = document.body;
 

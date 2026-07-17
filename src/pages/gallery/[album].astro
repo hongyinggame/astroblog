@@ -148,7 +148,6 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
       </div>
 
       {isEncrypted ? (
-        <!-- ============ 加密相册：独立布局 ============ -->
         <div id="encrypted-album-root" data-encrypted={encryptedGridData} data-slug={albumMeta.id}>
 
           <!-- 锁屏界面 -->
@@ -427,7 +426,6 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
         </div>
 
       ) : cover ? (
-        <!-- ============ 普通相册：封面横幅 + 照片网格 ============ -->
         <>
           <div class="w-full rounded-(--radius-large) overflow-hidden relative mb-4">
             <div class="relative w-full aspect-[3/1] min-h-[200px] max-h-[360px] overflow-hidden rounded-2xl">
@@ -467,7 +465,6 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
           </div>
         </>
       ) : (
-        <!-- 无封面普通相册 -->
         <>
           <div class="card-base px-6 py-4 rounded-2xl mb-4">
             <div class="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100">{albumMeta.name}</div>

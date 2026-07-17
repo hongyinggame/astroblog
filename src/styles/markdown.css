@@ -114,6 +114,62 @@
     }
   }
 
+  /* --- rehype-callouts 增强：给每种类型加上区分色彩的背景 --- */
+  .callout {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* NOTE - 蓝色 */
+  [data-callout="note"] {
+    background: color-mix(in srgb, var(--callout-note-color-light, #0969da) 8%, transparent);
+    border-left-color: var(--callout-note-color-light, #0969da);
+  }
+  .dark [data-callout="note"] {
+    background: color-mix(in srgb, var(--callout-note-color-dark, #2f81f7) 10%, transparent);
+    border-left-color: var(--callout-note-color-dark, #2f81f7);
+  }
+
+  /* TIP - 绿色 */
+  [data-callout="tip"] {
+    background: color-mix(in srgb, var(--callout-tip-color-light, #1a7f37) 8%, transparent);
+    border-left-color: var(--callout-tip-color-light, #1a7f37);
+  }
+  .dark [data-callout="tip"] {
+    background: color-mix(in srgb, var(--callout-tip-color-dark, #3fb950) 10%, transparent);
+    border-left-color: var(--callout-tip-color-dark, #3fb950);
+  }
+
+  /* IMPORTANT - 紫色 */
+  [data-callout="important"] {
+    background: color-mix(in srgb, var(--callout-important-color-light, #8250df) 8%, transparent);
+    border-left-color: var(--callout-important-color-light, #8250df);
+  }
+  .dark [data-callout="important"] {
+    background: color-mix(in srgb, var(--callout-important-color-dark, #a371f7) 10%, transparent);
+    border-left-color: var(--callout-important-color-dark, #a371f7);
+  }
+
+  /* WARNING - 黄色 */
+  [data-callout="warning"] {
+    background: color-mix(in srgb, var(--callout-warning-color-light, #9a6700) 8%, transparent);
+    border-left-color: var(--callout-warning-color-light, #9a6700);
+  }
+  .dark [data-callout="warning"] {
+    background: color-mix(in srgb, var(--callout-warning-color-dark, #d29922) 10%, transparent);
+    border-left-color: var(--callout-warning-color-dark, #d29922);
+  }
+
+  /* CAUTION - 红色 */
+  [data-callout="caution"] {
+    background: color-mix(in srgb, var(--callout-caution-color-light, #d1242f) 8%, transparent);
+    border-left-color: var(--callout-caution-color-light, #d1242f);
+  }
+  .dark [data-callout="caution"] {
+    background: color-mix(in srgb, var(--callout-caution-color-dark, #d1242f) 10%, transparent);
+    border-left-color: var(--callout-caution-color-dark, #d1242f);
+  }
+
   .katex-display-container {
     max-width: 100%;
     overflow-x: auto;

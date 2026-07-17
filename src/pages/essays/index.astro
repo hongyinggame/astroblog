@@ -11,6 +11,7 @@ import SpineModel from "@/components/features/SpineModel.astro";
 import { getCollection } from "astro:content";
 import type { ImageMetadata } from "astro";
 import { markdownToHtml } from "@/utils/markdown-to-html";
+import Footer from "@/components/layout/Footer.astro";
 import "@/styles/moment-list.css";
 
 const allEssays = await getCollection("essays", ({ data }) => {
@@ -167,6 +168,7 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 
   <SpineModel></SpineModel>
   {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+  <Footer />
   </div>
   <div id="right-sidebar-dynamic" style="display:none"></div>
   <div id="floating-toc-wrapper" style="display:none"></div>

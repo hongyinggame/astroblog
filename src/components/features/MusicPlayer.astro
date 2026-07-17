@@ -307,19 +307,19 @@ const widgetId =
             ui.iconRepeat.classList.remove('hidden');
             ui.iconRepeatOne.classList.add('hidden');
             ui.iconShuffle.classList.add('hidden');
-            ui.btnRepeat.setAttribute('title', config.i18n.listLoop || '列表循环');
+            ui.btnRepeat.setAttribute('title', cfg.i18n.listLoop || '列表循环');
         } else if (playMode === 1) {
             ui.btnRepeat.className = 'p-2 active:scale-95 transition-colors ' + primaryColor;
             ui.iconRepeat.classList.add('hidden');
             ui.iconRepeatOne.classList.remove('hidden');
             ui.iconShuffle.classList.add('hidden');
-            ui.btnRepeat.setAttribute('title', config.i18n.singleLoop || '单曲循环');
+            ui.btnRepeat.setAttribute('title', cfg.i18n.singleLoop || '单曲循环');
         } else {
             ui.btnRepeat.className = 'p-2 active:scale-95 transition-colors ' + primaryColor;
             ui.iconRepeat.classList.add('hidden');
             ui.iconRepeatOne.classList.add('hidden');
             ui.iconShuffle.classList.remove('hidden');
-            ui.btnRepeat.setAttribute('title', config.i18n.shuffle || '随机播放');
+            ui.btnRepeat.setAttribute('title', cfg.i18n.shuffle || '随机播放');
         }
     }
 

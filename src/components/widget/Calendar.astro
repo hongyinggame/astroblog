@@ -578,7 +578,7 @@ const postUrlPrefix = url("/posts/");
   initCalendar();
 
   // 页面切换时重新渲染
-  document.addEventListener("swup:contentReplaced", () => {
+  document.addEventListener("astro:after-swap", () => {
     setTimeout(initCalendar, 100);
   });
 </script>

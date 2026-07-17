@@ -63,6 +63,11 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			...(siteConfig.pages.anime ? [LinkPreset.Anime] : []),
 			...(siteConfig.pages.bangumi ? [LinkPreset.Bangumi] : []),
 			...(siteConfig.pages.library ? [LinkPreset.Library] : []),
+				{
+					name: "工具",
+					url: "/tools/",
+					icon: "material-symbols:build-circle",
+				},
 		],
 	});
 
@@ -81,7 +86,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		children: [
 			{
 				name: "开往",
-				url: "https://foreverblog.cn/go.html",
+				url: "https://www.travellings.cn/go.html",
 				external: true,
 				icon: "material-symbols:train",
 				hideExternalIcon: true,
@@ -91,6 +96,13 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				url: "https://foreverblog.cn/go.html",
 				external: true,
 				icon: "material-symbols:rocket-launch",
+				hideExternalIcon: true,
+			},
+			{
+				name: "异次元之旅",
+				url: "https://travel.moe/go?travel=on",
+				external: true,
+				icon: "mingcute:planet-line",
 				hideExternalIcon: true,
 			},
 		],
