@@ -11,7 +11,7 @@ lang: ''
 
 &emsp;&emsp;SQL的Join链接作为数据常用语句，之前一直对于ON和where有个误区，一直认为筛选条件在on中加与在where中加效果是一致的，但是在一次使用中发现了其中是有一定的区别的。
 &emsp;&emsp;先上两个sql：
-```Sql
+```sql
 --on中筛选
 select * from employee t1
 left join department t2

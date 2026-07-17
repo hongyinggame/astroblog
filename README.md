@@ -322,4 +322,4 @@ comment: true    # 是否允许评论
   pnpm new-post 技术/前端/react-hooks
 
   # 说说也可以
-  pnpm new-post 2026/六月随记 --type chatter
+  pnpm new-post 2026-06/六月 --type chatter
