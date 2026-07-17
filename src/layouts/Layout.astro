@@ -503,9 +503,10 @@ const siteLang = lang.replace("_", "-");
           );
           if (bannerTextOverlay) {
             const isHomePage =
-              window.location.pathname === baseUrl || 
+              window.location.pathname === baseUrl ||
               (baseUrl !== '/' && window.location.pathname === baseUrl.replace(/\/$/, '')) ||
-              window.location.pathname === "/";
+              window.location.pathname === "/" ||
+              window.location.pathname === "/articles/home/";
             if ((wallpaperMode === WALLPAPER_BANNER || wallpaperMode === WALLPAPER_FULLSCREEN) && isHomePage) {
               bannerTextOverlay.classList.remove("hidden");
             } else {

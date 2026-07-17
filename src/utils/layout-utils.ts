@@ -69,6 +69,7 @@ export const isHomePage = (pathname: string): boolean => {
 	if (pathname === baseUrl) return true;
 	if (pathname === baseUrlNoSlash) return true;
 	if (pathname === "/") return true;
+	if (pathname === "/articles/home/") return true;
 
 	return false;
 };
