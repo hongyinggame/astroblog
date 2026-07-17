@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="zh-CN" data-astro-cid-x777pncy><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>白噪音</title><link rel="stylesheet" href="/_astro/white-noise.DAd4IzEY.css"><script type="module" src="/_astro/page.L0U7MNaK.js"></script></head><body class="whitenoise-page" data-astro-cid-x777pncy><script type="module">(function(){var e=localStorage.getItem("hue");e&&document.documentElement.style.setProperty("--hue",e)})();</script><!-- 视频背景 --><video id="video-bg" autoplay muted loop playsinline data-astro-cid-x777pncy><source src="/_astro/rain2.DTN7rvdL.mp4" type="video/mp4" data-astro-cid-x777pncy></video><div class="video-fallback" id="video-fallback" data-astro-cid-x777pncy></div><!-- 半透明覆盖 --><div class="overlay" data-astro-cid-x777pncy></div><!-- 主要内容 --><div class="content-container" data-astro-cid-x777pncy><!-- 时钟 --><div class="clock-container" data-astro-cid-x777pncy><div id="clock" data-astro-cid-x777pncy>00:00:00</div><div id="date-text" data-astro-cid-x777pncy>加载中...</div></div><!-- 噪音类型选择 --><div class="player-section" data-astro-cid-x777pncy><div class="noise-selector" id="noise-selector" data-astro-cid-x777pncy><button class="noise-btn active" data-noise="white" data-video="/_astro/rain2.DTN7rvdL.mp4" title="均匀覆盖所有频率" data-astro-cid-x777pncy>白噪音</button><button class="noise-btn" data-noise="pink" data-video="/_astro/rain.RZD377GC.mp4" title="柔和自然，适合放松" data-astro-cid-x777pncy>粉噪音</button><button class="noise-btn" data-noise="brown" data-video="/_astro/wind.ztf-62WF.mp4" title="深沉低频，如瀑布雷鸣" data-astro-cid-x777pncy>棕噪音</button></div></div><!-- 播放 + 音量卡片 --><div class="player-section" data-astro-cid-x777pncy><div class="noise-card" data-astro-cid-x777pncy><button id="play-btn" title="播放 / 暂停" data-astro-cid-x777pncy><span id="icon-play" class="flex" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M8 5v14l11-7z" data-astro-cid-x777pncy></path></svg></span><span id="icon-stop" class="hidden" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><rect x="6" y="6" width="12" height="12" rx="2" data-astro-cid-x777pncy></rect></svg></span></button><div class="volume-row" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M3 9v6h4l5 5V4L7 9H3z" data-astro-cid-x777pncy></path></svg><input type="range" id="volume-slider" min="0" max="100" value="40" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" data-astro-cid-x777pncy></path></svg></div></div></div></div><!-- 左上角返回 --><a href="/tools/" class="back-btn" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" data-astro-cid-x777pncy></path></svg>返回</a><!-- 底部左侧: 全屏 --><div class="bottom-controls left" data-astro-cid-x777pncy><button class="ctrl-btn" id="toggle-fullscreen" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" data-astro-cid-x777pncy></path></svg>全屏</button></div><!-- 底部右侧: 提示 --><div class="bottom-controls right" data-astro-cid-x777pncy><span style="opacity:0.5;font-size:12px;color:oklch(1 0 0 / 0.5);" data-astro-cid-x777pncy>空格键 播放 · F键 全屏</span></div><!-- 隐藏模式切换按钮（始终可见，独立于 bottom-controls） --><button class="hide-toggle" id="hide-toggle" title="隐藏界面" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" data-astro-cid-x777pncy></path></svg></button><!-- 右侧浮动面板 --><div class="floating-panel" id="floating-panel" data-astro-cid-x777pncy><button class="panel-tab" id="panel-tab" title="收起面板" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" data-astro-cid-x777pncy></path></svg></button><div class="panel-body" data-astro-cid-x777pncy><div class="panel-clock" id="panel-clock" data-astro-cid-x777pncy>00:00:00</div><div class="panel-date" id="panel-date" data-astro-cid-x777pncy>加载中...</div><div class="panel-noise-selector" id="panel-noise-selector" data-astro-cid-x777pncy><button class="panel-noise-btn active" data-noise="white" data-astro-cid-x777pncy>白噪音</button><button class="panel-noise-btn" data-noise="pink" data-astro-cid-x777pncy>粉噪音</button><button class="panel-noise-btn" data-noise="brown" data-astro-cid-x777pncy>棕噪音</button></div><button class="panel-play-btn" id="panel-play-btn" title="播放 / 暂停" data-astro-cid-x777pncy><span id="panel-icon-play" class="flex" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M8 5v14l11-7z" data-astro-cid-x777pncy></path></svg></span><span id="panel-icon-stop" class="hidden" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><rect x="6" y="6" width="12" height="12" rx="2" data-astro-cid-x777pncy></rect></svg></span></button><div class="panel-volume-row" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M3 9v6h4l5 5V4L7 9H3z" data-astro-cid-x777pncy></path></svg><input type="range" class="panel-volume-slider" id="panel-volume-slider" min="0" max="100" value="40" data-astro-cid-x777pncy><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-x777pncy><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" data-astro-cid-x777pncy></path></svg></div></div></div><script>
+    (function() {
+      // DOM
+      const playBtn = document.getElementById("play-btn");
+      const iconPlay = document.getElementById("icon-play");
+      const iconStop = document.getElementById("icon-stop");
+      const volumeSlider = document.getElementById("volume-slider");
+      const video = document.getElementById("video-bg");
+      const videoFallback = document.getElementById("video-fallback");
+      const fullscreenBtn = document.getElementById("toggle-fullscreen");
+
+      // 从按钮 data 属性读取视频映射
+      const videoMap = {};
+      document.querySelectorAll(".noise-btn").forEach(btn => {
+        videoMap[btn.dataset.noise] = btn.dataset.video;
+      });
+
+      // Web Audio
+      let audioContext = null;
+      let noiseSource = null;
+      let gainNode = null;
+      let filterNode = null;
+      let isPlaying = false;
+      let currentNoise = "white";
+
+      // 视频加载失败时显示渐变背景
+      video.addEventListener("error", () => {
+        video.style.display = "none";
+        videoFallback.style.display = "block";
+      });
+
+      function createNoiseBuffer(type) {
+        const ctx = audioContext;
+        const size = 2 * ctx.sampleRate;
+        const buffer = ctx.createBuffer(1, size, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        switch (type) {
+          case "white":
+            for (let i = 0; i < size; i++) data[i] = Math.random() * 2 - 1;
+            break;
+          case "pink": {
+            let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+            for (let i = 0; i < size; i++) {
+              const w = Math.random() * 2 - 1;
+              b0 = 0.99886*b0 + w*0.0555179;
+              b1 = 0.99332*b1 + w*0.0750759;
+              b2 = 0.96900*b2 + w*0.1538520;
+              b3 = 0.86650*b3 + w*0.3104856;
+              b4 = 0.55000*b4 + w*0.5329522;
+              b5 = -0.7616*b5 - w*0.0168980;
+              data[i] = (b0+b1+b2+b3+b4+b5+b6 + w*0.5362) * 0.11;
+              b6 = w * 0.115926;
+            }
+            break;
+          }
+          case "brown": {
+            let last = 0;
+            for (let i = 0; i < size; i++) {
+              const w = Math.random() * 2 - 1;
+              data[i] = (last + 0.02*w) / 1.02;
+              last = data[i];
+              data[i] *= 3.5;
+            }
+            break;
+          }
+        }
+        return buffer;
+      }
+
+      function startNoise() {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        stopNoise();
+
+        const buffer = createNoiseBuffer(currentNoise);
+        noiseSource = audioContext.createBufferSource();
+        noiseSource.buffer = buffer;
+        noiseSource.loop = true;
+
+        filterNode = audioContext.createBiquadFilter();
+        filterNode.type = "lowpass";
+        filterNode.frequency.value = currentNoise === "white" ? 8000 : currentNoise === "pink" ? 2000 : 800;
+
+        gainNode = audioContext.createGain();
+        gainNode.gain.value = parseInt(volumeSlider.value) / 100 * 0.4;
+
+        noiseSource.connect(filterNode);
+        filterNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        noiseSource.start(0);
+      }
+
+      function stopNoise() {
+        if (noiseSource) {
+          try { noiseSource.stop(); } catch(e) {}
+          noiseSource.disconnect();
+          noiseSource = null;
+        }
+        if (filterNode) { filterNode.disconnect(); filterNode = null; }
+        if (gainNode) { gainNode.disconnect(); gainNode = null; }
+      }
+
+      function updatePlayIcons(playing) {
+        if (playing) {
+          iconPlay.classList.add("hidden"); iconPlay.classList.remove("flex");
+          iconStop.classList.remove("hidden"); iconStop.classList.add("flex");
+        } else {
+          iconPlay.classList.remove("hidden"); iconPlay.classList.add("flex");
+          iconStop.classList.add("hidden"); iconStop.classList.remove("flex");
+        }
+        // 同步面板图标
+        const pi = document.getElementById("panel-icon-play");
+        const ps = document.getElementById("panel-icon-stop");
+        if (pi && ps) {
+          if (playing) {
+            pi.classList.add("hidden"); pi.classList.remove("flex");
+            ps.classList.remove("hidden"); ps.classList.add("flex");
+          } else {
+            pi.classList.remove("hidden"); pi.classList.add("flex");
+            ps.classList.add("hidden"); ps.classList.remove("flex");
+          }
+        }
+      }
+      function togglePlay() {
+        if (isPlaying) {
+          stopNoise();
+          isPlaying = false;
+        } else {
+          startNoise();
+          isPlaying = true;
+        }
+        updatePlayIcons(isPlaying);
+      }
+
+      playBtn.addEventListener("click", togglePlay);
+
+      volumeSlider.addEventListener("input", () => {
+        if (gainNode) {
+          gainNode.gain.value = parseInt(volumeSlider.value) / 100 * 0.4;
+        }
+      });
+
+      // 噪音类型切换
+      document.querySelectorAll(".noise-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".noise-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const newNoise = btn.dataset.noise;
+          if (newNoise !== currentNoise) {
+            currentNoise = newNoise;
+            // 切换视频背景
+            const newVideoSrc = videoMap[currentNoise];
+            if (newVideoSrc) {
+              const srcEl = video.querySelector("source");
+              srcEl.setAttribute("src", newVideoSrc);
+              video.load();
+              video.play().catch(() => {});
+            }
+            if (isPlaying) {
+              stopNoise();
+              startNoise();
+            }
+          }
+        });
+      });
+
+      // 全屏
+      function updateFullscreenUI() {
+        const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement
+          || document.mozFullScreenElement || document.msFullscreenElement);
+        fullscreenBtn.innerHTML = isFS
+          ? '<svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>退出全屏'
+          : '<svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>全屏';
+      }
+
+      fullscreenBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement
+          && !document.mozFullScreenElement && !document.msFullscreenElement) {
+          const el = document.documentElement;
+          (el.requestFullscreen || el.webkitRequestFullscreen
+            || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
+        } else {
+          (document.exitFullscreen || document.webkitExitFullscreen
+            || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
+        }
+      });
+
+      document.addEventListener("fullscreenchange", updateFullscreenUI);
+      document.addEventListener("webkitfullscreenchange", updateFullscreenUI);
+
+      // 时钟（含面板同步）
+      const panelClock = document.getElementById("panel-clock");
+      const panelDate = document.getElementById("panel-date");
+      function updateClock() {
+        const now = new Date();
+        const timeStr = [now.getHours(), now.getMinutes(), now.getSeconds()]
+          .map(n => String(n).padStart(2, "0")).join(":");
+        const dateStr = now.toLocaleDateString("zh-CN", {
+          weekday: "long", year: "numeric", month: "long", day: "numeric"
+        });
+        document.getElementById("clock").textContent = timeStr;
+        document.getElementById("date-text").textContent = dateStr;
+        panelClock.textContent = timeStr;
+        panelDate.textContent = dateStr;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // ---- 隐藏模式 & 浮动面板 ----
+      const page = document.querySelector(".whitenoise-page");
+      const hideToggle = document.getElementById("hide-toggle");
+      const hideToggleSvg = hideToggle.querySelector("svg");
+      const floatingPanel = document.getElementById("floating-panel");
+      const panelTab = document.getElementById("panel-tab");
+      const panelPlayBtn = document.getElementById("panel-play-btn");
+      const panelVolumeSlider = document.getElementById("panel-volume-slider");
+      let hideMode = false;
+
+      const EYE_OPEN = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+      const EYE_CLOSE = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+
+      hideToggle.addEventListener("click", () => {
+        hideMode = !hideMode;
+        if (hideMode) {
+          page.classList.add("hide-mode");
+          floatingPanel.classList.add("open");
+          hideToggleSvg.innerHTML = EYE_CLOSE;
+          hideToggle.title = "显示界面";
+        } else {
+          page.classList.remove("hide-mode");
+          floatingPanel.classList.remove("open");
+          hideToggleSvg.innerHTML = EYE_OPEN;
+          hideToggle.title = "隐藏界面";
+        }
+      });
+
+      panelTab.addEventListener("click", () => {
+        floatingPanel.classList.toggle("open");
+      });
+
+      // 面板噪音选择
+      document.querySelectorAll("#panel-noise-selector .panel-noise-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#panel-noise-selector .panel-noise-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const newNoise = btn.dataset.noise;
+          // 同步主噪音按钮
+          document.querySelectorAll("#noise-selector .noise-btn").forEach(b => b.classList.remove("active"));
+          const mainBtn = document.querySelector(`#noise-selector .noise-btn[data-noise="${newNoise}"]`);
+          if (mainBtn) { mainBtn.classList.add("active"); mainBtn.click(); }
+        });
+      });
+
+      // 同步主噪音按钮点击到面板
+      document.querySelectorAll("#noise-selector .noise-btn").forEach(btn => {
+        const origClick = btn.onclick;
+        btn.addEventListener("click", () => {
+          const noise = btn.dataset.noise;
+          document.querySelectorAll("#panel-noise-selector .panel-noise-btn").forEach(b => {
+            b.classList.toggle("active", b.dataset.noise === noise);
+          });
+        });
+      });
+
+      // 面板播放按钮
+      panelPlayBtn.addEventListener("click", () => {
+        playBtn.click();
+      });
+
+      // 面板音量同步
+      panelVolumeSlider.addEventListener("input", () => {
+        volumeSlider.value = panelVolumeSlider.value;
+        if (gainNode) {
+          gainNode.gain.value = parseInt(volumeSlider.value) / 100 * 0.4;
+        }
+      });
+      volumeSlider.addEventListener("input", () => {
+        panelVolumeSlider.value = volumeSlider.value;
+      });
+
+      // 键盘快捷键
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space" && e.target === document.body) {
+          e.preventDefault();
+          togglePlay();
+        } else if (e.code === "KeyF" && e.target === document.body) {
+          e.preventDefault();
+          fullscreenBtn.click();
+        }
+      });
+    })();
+  </script></body></html>

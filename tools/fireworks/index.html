@@ -1,0 +1,621 @@
+<!DOCTYPE html><html lang="zh-CN" data-astro-cid-7ei367ai><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>烟花模拟</title><style>.fireworks-page[data-astro-cid-7ei367ai]{margin:0;padding:0;box-sizing:border-box;height:100vh;height:100dvh;overflow:hidden;background:#000;cursor:crosshair}.fireworks-page[data-astro-cid-7ei367ai] [data-astro-cid-7ei367ai]{margin:0;padding:0;box-sizing:border-box}canvas[data-astro-cid-7ei367ai]{display:block;position:absolute;top:0;left:0}.back-btn[data-astro-cid-7ei367ai]{position:fixed;top:24px;left:24px;z-index:10;background:#ffffff14;border:1px solid #ffffff1f;backdrop-filter:blur(8px);color:#fffc;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .3s;text-decoration:none;display:flex;align-items:center;gap:4px;font-family:system-ui,sans-serif}.back-btn[data-astro-cid-7ei367ai]:hover{background:#ffffff26;color:#fff}.back-btn[data-astro-cid-7ei367ai] svg[data-astro-cid-7ei367ai]{width:16px;height:16px}.hint[data-astro-cid-7ei367ai]{position:fixed;bottom:28px;left:0;right:0;text-align:center;z-index:10;color:#ffffff40;font-size:13px;font-family:system-ui,sans-serif;pointer-events:none}.bottom-right[data-astro-cid-7ei367ai]{position:fixed;bottom:28px;right:28px;z-index:10;display:flex;gap:8px}.ctrl-btn[data-astro-cid-7ei367ai]{background:#ffffff14;border:1px solid #ffffff1f;backdrop-filter:blur(8px);color:#ffffffb3;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .3s;font-family:system-ui,sans-serif;display:flex;align-items:center;gap:4px}.ctrl-btn[data-astro-cid-7ei367ai]:hover{background:#ffffff26;color:#fff}.ctrl-btn[data-astro-cid-7ei367ai] svg[data-astro-cid-7ei367ai]{width:14px;height:14px}.ctrl-btn[data-astro-cid-7ei367ai].active{background:#fff3;border-color:#ffffff4d;color:#fff}
+</style><script type="module" src="/_astro/page.L0U7MNaK.js"></script></head><body class="fireworks-page" data-astro-cid-7ei367ai><canvas id="canvas" data-astro-cid-7ei367ai></canvas><!-- 左上角返回 --><a href="/tools/" class="back-btn" data-astro-cid-7ei367ai><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-7ei367ai><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" data-astro-cid-7ei367ai></path></svg>返回</a><!-- 底部提示 --><div class="hint" id="hint-text" data-astro-cid-7ei367ai>点击任意位置放烟花 · 空格键发射</div><!-- 右下角控制 --><div class="bottom-right" data-astro-cid-7ei367ai><button class="ctrl-btn" id="clear-btn" data-astro-cid-7ei367ai><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-7ei367ai><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" data-astro-cid-7ei367ai></path></svg>清除</button><button class="ctrl-btn" id="fullscreen-btn" data-astro-cid-7ei367ai><svg viewBox="0 0 24 24" fill="currentColor" data-astro-cid-7ei367ai><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" data-astro-cid-7ei367ai></path></svg>全屏</button></div><script>
+    (function() {
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      let W, H;
+      let fireworks = [];
+      let particles = [];
+      let sparkles = [];    // 二级爆炸粒子（小闪光）
+      let audioReady = false;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      // ---------- 音效（真实MP3音频）----------
+      const BASE_URL = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/329180/";
+      const soundManager = {
+        ctx: null,
+        sources: {
+          lift: { volume: 1, rateMin: 0.85, rateMax: 0.95, files: ["lift1.mp3","lift2.mp3","lift3.mp3"] },
+          burst: { volume: 1, rateMin: 0.8, rateMax: 0.9, files: ["burst1.mp3","burst2.mp3"] },
+          burstSmall: { volume: 0.25, rateMin: 0.8, rateMax: 1, files: ["burst-sm-1.mp3","burst-sm-2.mp3"] },
+          crackle: { volume: 0.2, rateMin: 1, rateMax: 1, files: ["crackle1.mp3"] },
+          crackleSmall: { volume: 0.25, rateMin: 1, rateMax: 1, files: ["crackle-sm-1.mp3"] }
+        },
+        _lastSmallBurst: 0,
+
+        preload() {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const all = [];
+          Object.keys(this.sources).forEach(type => {
+            const src = this.sources[type];
+            const promises = src.files.map(f =>
+              fetch(BASE_URL + f)
+                .then(r => { if (!r.ok) throw new Error(r.statusText); return r.arrayBuffer(); })
+                .then(buf => new Promise(resolve => this.ctx.decodeAudioData(buf, resolve)))
+            );
+            Promise.all(promises).then(buffers => { src.buffers = buffers; });
+            all.push(...promises);
+          });
+          return Promise.all(all);
+        },
+
+        play(type, scale) {
+          scale = Math.max(0, Math.min(1, scale == null ? 1 : scale));
+          if (!this.ctx || this.ctx.state === "suspended") return;
+          if (type === "burstSmall") {
+            const now = Date.now();
+            if (now - this._lastSmallBurst < 20) return;
+            this._lastSmallBurst = now;
+          }
+          const src = this.sources[type];
+          if (!src || !src.buffers) return;
+          const rate = src.rateMin + Math.random() * (src.rateMax - src.rateMin);
+          const vol = src.volume * scale;
+          const buf = src.buffers[Math.floor(Math.random() * src.buffers.length)];
+          const gain = this.ctx.createGain();
+          gain.gain.value = vol;
+          const bs = this.ctx.createBufferSource();
+          bs.playbackRate.value = rate * (2 - scale);
+          bs.buffer = buf;
+          bs.connect(gain);
+          gain.connect(this.ctx.destination);
+          bs.start(0);
+        }
+      };
+
+      function playLaunch() {
+        soundManager.play("lift");
+      }
+
+      function playExplosion() {
+        soundManager.play("burst");
+      }
+
+      function playCrackle() {
+        soundManager.play("burstSmall");
+      }
+
+      // 首次点击时初始化音频
+      function initAudioOnInteraction() {
+        if (soundManager.ctx) return;
+        soundManager.preload().then(() => { audioReady = true; });
+      }
+      canvas.addEventListener("click", initAudioOnInteraction, { once: true });
+      document.addEventListener("keydown", initAudioOnInteraction, { once: true });
+
+      // ---------- 颜色系统 ----------
+      const PALETTE = [
+        { h: 354, s: 100, l: 55 },  // 红
+        { h: 40,  s: 100, l: 55 },  // 金
+        { h: 145, s: 90,  l: 50 },  // 绿
+        { h: 190, s: 90,  l: 52 },  // 青
+        { h: 220, s: 85,  l: 55 },  // 蓝
+        { h: 285, s: 85,  l: 52 },  // 紫
+        { h: 330, s: 90,  l: 55 },  // 粉
+        { h: 20,  s: 95,  l: 52 },  // 橙
+        { h: 0,   s: 0,   l: 95 },  // 白
+      ];
+      let _lastColorIdx = -1;
+
+      function randomColor() {
+        let idx;
+        do { idx = Math.floor(Math.random() * (PALETTE.length - 1)); }  // 排除白色
+        while (idx === _lastColorIdx && PALETTE.length > 2);
+        _lastColorIdx = idx;
+        const c = PALETTE[idx];
+        return { h: c.h, s: c.s, l: c.l + (Math.random() - 0.5) * 15 };
+      }
+
+      function colorStr(c, alpha) {
+        alpha = alpha == null ? 1 : alpha;
+        return `hsla(${c.h},${c.s}%,${c.l}%,${alpha})`;
+      }
+
+      // ---------- 形状生成 ----------
+      const SHAPES = ["circle", "heart", "star", "ring", "willow", "spiral", "cross", "chrysanthemum", "doubleRing", "peony", "fountain", "galaxy", "dog", "cat", "rocket", "planet", "crown", "butterfly", "fish"];
+
+      function shapeOffsets(shape, count) {
+        const offsets = [];
+        function edgeRing(n, r, spread) {
+          const pts = [];
+          for (let i = 0; i < n; i++) {
+            const a = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * spread;
+            pts.push({ dx: Math.cos(a) * r, dy: Math.sin(a) * r });
+          }
+          return pts;
+        }
+        function filledCircle(n, maxR) {
+          const pts = [];
+          for (let i = 0; i < n; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random()) * maxR;
+            pts.push({ dx: Math.cos(a) * r, dy: Math.sin(a) * r });
+          }
+          return pts;
+        }
+        function ellipse(n, rx, ry, cx, cy) {
+          const pts = [];
+          for (let i = 0; i < n; i++) {
+            const a = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * 0.2;
+            pts.push({ dx: cx + Math.cos(a) * rx, dy: cy + Math.sin(a) * ry });
+          }
+          return pts;
+        }
+
+        switch (shape) {
+          case "circle":
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.25;
+              const r = 1.5 + Math.random() * 4.8;
+              offsets.push({ dx: Math.cos(a) * r, dy: Math.sin(a) * r });
+            }
+            break;
+          case "heart":
+            for (let i = 0; i < count; i++) {
+              const t = (Math.PI * 2 * i) / count;
+              const x = 16 * Math.pow(Math.sin(t), 3);
+              const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+              const s = 0.22 + Math.random() * 0.18;
+              offsets.push({ dx: x * s, dy: y * s });
+            }
+            break;
+          case "star":
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count;
+              const arm = i % Math.floor(count / 5);
+              const inArm = arm < 1;
+              const r = inArm ? 4.5 + Math.random() * 1.5 : 1.5 + Math.random() * 2;
+              offsets.push({ dx: Math.cos(a) * r, dy: Math.sin(a) * r });
+            }
+            break;
+          case "ring": {
+            const squash = Math.random() * 0.5 + 0.5;
+            const rotate = Math.random() * Math.PI;
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.12;
+              const r = 3.6 + Math.random() * 1.0;
+              const dx = Math.cos(a) * r * squash;
+              const dy = Math.sin(a) * r;
+              offsets.push({
+                dx: dx * Math.cos(rotate) - dy * Math.sin(rotate),
+                dy: dx * Math.sin(rotate) + dy * Math.cos(rotate)
+              });
+            }
+            break;
+          }
+          case "willow":
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
+              const r = 0.8 + Math.random() * 5.5;
+              offsets.push({ dx: Math.cos(a) * r, dy: 2 + Math.abs(Math.sin(a)) * 3.5 + Math.random() * 1.2 });
+            }
+            break;
+          case "spiral":
+            for (let i = 0; i < count; i++) {
+              const t = (Math.PI * 2 * i * 4) / count;
+              const r = (i / count) * 5.5 + Math.random() * 0.6;
+              offsets.push({ dx: Math.cos(t) * r, dy: Math.sin(t) * r });
+            }
+            break;
+          case "cross":
+            for (let i = 0; i < count; i++) {
+              const arm = i % 4;
+              const baseAngle = (Math.PI / 2) * arm + (Math.random() - 0.5) * 0.35;
+              const dist = 0.5 + Math.random() * 5.5;
+              offsets.push({ dx: Math.cos(baseAngle) * dist, dy: Math.sin(baseAngle) * dist });
+            }
+            break;
+          case "chrysanthemum":
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.2;
+              const density = Math.random();
+              const r = density < 0.6
+                ? 3.5 + Math.random() * 2.0
+                : 0.3 + Math.random() * 2.8;
+              offsets.push({ dx: Math.cos(a) * r, dy: Math.sin(a) * r });
+            }
+            break;
+          case "doubleRing":
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.1;
+              const ring = i < count / 2 ? 2.2 + Math.random() * 0.6 : 4.5 + Math.random() * 0.8;
+              offsets.push({ dx: Math.cos(a) * ring, dy: Math.sin(a) * ring });
+            }
+            break;
+          case "peony":
+            for (let i = 0; i < count; i++) {
+              const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+              const r = Math.pow(Math.random(), 0.5) * 6;
+              offsets.push({ dx: Math.cos(a) * r, dy: Math.sin(a) * r });
+            }
+            break;
+          case "fountain":
+            for (let i = 0; i < count; i++) {
+              const a = Math.PI * 0.35 + (Math.random() - 0.5) * Math.PI * 0.7;
+              const r = 0.5 + Math.random() * 5;
+              offsets.push({ dx: Math.cos(a) * r * 0.6, dy: -Math.sin(a) * r });
+            }
+            break;
+          case "galaxy":
+            for (let i = 0; i < count; i++) {
+              const t = (Math.PI * 2 * i * 2.5) / count;
+              const r = (i / count) * 5 + Math.random() * 0.7;
+              const armSpread = Math.sin(t * 2) * 1.2;
+              offsets.push({
+                dx: Math.cos(t) * r + Math.cos(t + Math.PI / 2) * armSpread,
+                dy: Math.sin(t) * r + Math.sin(t + Math.PI / 2) * armSpread
+              });
+            }
+            break;
+          // ---- 具象形状 ----
+          case "dog": {
+            // 头部轮廓 + 耳朵 + 鼻子
+            offsets.push(...edgeRing(count * 0.35, 3.5, 0.3));
+            offsets.push(...edgeRing(count * 0.1, 1.8, 0.5).map(p => ({ dx: p.dx - 2.5, dy: p.dy - 3.6 })));
+            offsets.push(...edgeRing(count * 0.1, 1.8, 0.5).map(p => ({ dx: p.dx + 2.5, dy: p.dy - 3.6 })));
+            offsets.push(...filledCircle(count * 0.15, 0.7).map(p => ({ dx: p.dx, dy: p.dy + 1.8 })));
+            break;
+          }
+          case "cat": {
+            // 圆脸 + 三角耳 + 小鼻子
+            offsets.push(...edgeRing(count * 0.4, 3.2, 0.25));
+            offsets.push(...filledCircle(count * 0.12, 1.6).map(p => ({ dx: p.dx - 2.2, dy: p.dy - 3.2 })));
+            offsets.push(...filledCircle(count * 0.12, 1.6).map(p => ({ dx: p.dx + 2.2, dy: p.dy - 3.2 })));
+            offsets.push(...edgeRing(count * 0.08, 0.5, 0.8).map(p => ({ dx: p.dx, dy: p.dy + 0.8 })));
+            break;
+          }
+          case "rocket": {
+            // 箭身 + 鼻锥 + 尾翼 + 火焰
+            const bodyW = 1.2, bodyH = 5;
+            for (let i = 0; i < count * 0.4; i++) {
+              offsets.push({ dx: (Math.random() - 0.5) * bodyW * 2, dy: -Math.random() * bodyH });
+            }
+            for (let i = 0; i < count * 0.2; i++) {
+              const y = -bodyH - Math.random() * 2;
+              const w = (y + bodyH) / 2 * bodyW;
+              offsets.push({ dx: (Math.random() - 0.5) * w * 2, dy: y });
+            }
+            for (let i = 0; i < count * 0.15; i++) {
+              const side = i % 2 ? 1 : -1;
+              offsets.push({ dx: side * (bodyW + Math.random() * 1.5), dy: 1 + Math.random() * 2 });
+            }
+            for (let i = 0; i < count * 0.15; i++) {
+              offsets.push({ dx: (Math.random() - 0.5) * 1.4, dy: 1.5 + Math.random() * 3.5 });
+            }
+            break;
+          }
+          case "planet": {
+            // 球体 + 光环
+            offsets.push(...filledCircle(count * 0.55, 3.8));
+            offsets.push(...ellipse(count * 0.3, 5.5, 0.6, 0, 0));
+            break;
+          }
+          case "crown": {
+            // 底座 + 三个尖顶
+            for (let i = 0; i < count * 0.25; i++) {
+              offsets.push({ dx: -3.5 + Math.random() * 7, dy: 2.5 + Math.random() * 1 });
+            }
+            const peaks = [-2.8, 0, 2.8];
+            peaks.forEach(px => {
+              for (let i = 0; i < count * 0.15; i++) {
+                const t = Math.random();
+                offsets.push({ dx: px - 1 + t * 2, dy: 2.5 - t * 4.5 + Math.random() * 0.6 });
+              }
+            });
+            break;
+          }
+          case "butterfly": {
+            // 左右翅膀 + 身体
+            const wings = [[-3.5, 0], [3.5, 0]];
+            wings.forEach(([cx, cy]) => {
+              offsets.push(...ellipse(count * 0.22, 2.2, 3.5, cx, cy));
+              offsets.push(...ellipse(count * 0.12, 1.2, 1.5, cx, cy - 2));
+            });
+            for (let i = 0; i < count * 0.1; i++) {
+              offsets.push({ dx: (Math.random() - 0.5) * 0.6, dy: -3.5 + Math.random() * 5 });
+            }
+            break;
+          }
+          case "fish": {
+            // 椭圆身体 + 扇形尾巴
+            for (let i = 0; i < count * 0.55; i++) {
+              const a = Math.random() * Math.PI * 2;
+              offsets.push({ dx: Math.cos(a) * 3.5, dy: Math.sin(a) * 2.2 });
+            }
+            for (let i = 0; i < count * 0.25; i++) {
+              const ta = -Math.PI * 0.6 + Math.random() * Math.PI * 1.2;
+              const tr = 1 + Math.random() * 2.8;
+              offsets.push({ dx: 3 + Math.cos(ta) * tr, dy: Math.sin(ta) * tr });
+            }
+            break;
+          }
+        }
+        return offsets;
+      }
+
+      // ---------- 烟花 ----------
+      class Firework {
+        constructor(x, targetY) {
+          this.x = x || Math.random() * W;
+          this.y = H;
+          this.targetY = targetY || H * 0.08 + Math.random() * H * 0.35;
+          this.speed = 3.5 + Math.random() * 6;
+          this.color = randomColor();
+          this.shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+          this.exploded = false;
+          this.trail = [];
+          this.dualColor = Math.random() < 0.35;
+          this.secondColor = this.dualColor ? randomColor() : null;
+          this.hasPistil = Math.random() < 0.4;
+          this.secondExplodes = Math.random() < 0.35;
+        }
+
+        update() {
+          if (!this.exploded) {
+            this.trail.push({ x: this.x, y: this.y, life: 8 });
+            this.y -= this.speed;
+            if (this.y <= this.targetY) {
+              this.exploded = true;
+              this.explode();
+            }
+          }
+        }
+
+        explode() {
+          const count = 50 + Math.floor(Math.random() * 60);
+          const offsets = shapeOffsets(this.shape, count);
+          const baseColor = this.color;
+          playExplosion();
+
+          offsets.forEach(({ dx, dy }, i) => {
+            const speed = 0.8 + Math.random() * 4.5;
+            const a = Math.atan2(dy, dx);
+            const hueShift = (Math.random() - 0.5) * 35;
+            const altColor = this.dualColor && i % 3 === 0;
+            const c = altColor
+              ? { h: (this.secondColor.h + hueShift + 360) % 360, s: this.secondColor.s, l: this.secondColor.l }
+              : { h: (baseColor.h + hueShift + 360) % 360, s: baseColor.s, l: baseColor.l };
+            const spd = speed * (Math.abs(dx) + Math.abs(dy)) * 0.45;
+            particles.push(new Particle(this.x, this.y, a, spd, c, this.secondExplodes));
+          });
+
+          // 花蕊：中心高亮小粒子
+          if (this.hasPistil) {
+            const pistilCount = 12 + Math.floor(Math.random() * 16);
+            for (let i = 0; i < pistilCount; i++) {
+              const a = Math.random() * Math.PI * 2;
+              const s = 0.3 + Math.random() * 1.5;
+              const p = new Particle(this.x, this.y, a, s, { h: 0, s: 0, l: 90 + Math.random() * 10 }, false);
+              p.size = 0.3 + Math.random() * 0.9;
+              p.life = 15 + Math.random() * 20;
+              p.maxLife = p.life;
+              particles.push(p);
+            }
+          }
+        }
+
+        draw(ctx) {
+          if (this.exploded) return;
+          for (let i = 0; i < this.trail.length; i++) {
+            const t = this.trail[i];
+            t.life--;
+            const alpha = t.life / 8;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = colorStr(this.color, alpha);
+            ctx.fill();
+          }
+          this.trail = this.trail.filter(t => t.life > 0);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#fff";
+          ctx.shadowColor = colorStr(this.color);
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // ---------- 粒子 ----------
+      class Particle {
+        constructor(x, y, angle, speed, color, secondary) {
+          this.x = x;
+          this.y = y;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed;
+          this.color = color;
+          this.life = 50 + Math.random() * 60;
+          this.maxLife = this.life;
+          this.size = 0.5 + Math.random() * 2.6;
+          this.gravity = 0.02 + Math.random() * 0.025;
+          this.secondary = !!secondary;
+          this._triggered = false;
+          this.sparkTimer = 0;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vy += this.gravity;
+          this.vx *= 0.994;
+          this.vy *= 0.994;
+          this.life--;
+        }
+
+        secondExplode(sparklesArr) {
+          const count = 15 + Math.floor(Math.random() * 25);
+          const hueShift = (Math.random() - 0.5) * 80;
+          for (let i = 0; i < count; i++) {
+            const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+            const s = 0.8 + Math.random() * 2.5;
+            sparklesArr.push(new Sparkle(
+              this.x, this.y,
+              Math.cos(a) * s, Math.sin(a) * s,
+              { h: (this.color.h + hueShift + 360) % 360, s: this.color.s, l: 65 + Math.random() * 35 }
+            ));
+          }
+          this.life = 0; // 原粒子消失
+        }
+
+        draw(ctx) {
+          const alpha = this.life / this.maxLife;
+          const fadeAlpha = alpha < 0.1 ? alpha / 0.1 : 1;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = colorStr(this.color, Math.max(alpha * fadeAlpha, 0.03));
+          ctx.globalCompositeOperation = "lighter";
+          ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
+        }
+      }
+
+      // ---------- 二级闪光 ----------
+      class Sparkle {
+        constructor(x, y, vx, vy, color) {
+          this.x = x; this.y = y;
+          this.vx = vx; this.vy = vy;
+          this.color = color;
+          this.life = 25 + Math.random() * 30;
+          this.maxLife = this.life;
+          this.size = 0.4 + Math.random() * 1.2;
+          this.gravity = 0.015;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vy += this.gravity;
+          this.life--;
+        }
+        draw(ctx) {
+          const alpha = this.life / this.maxLife;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = colorStr(this.color, alpha);
+          ctx.globalCompositeOperation = "lighter";
+          ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
+        }
+      }
+
+      function launchFirework(x, y) {
+        playLaunch();
+        fireworks.push(new Firework(x, y));
+      }
+
+      function launchMultiple(n) {
+        for (let i = 0; i < n; i++) {
+          setTimeout(() => launchFirework(), i * 100);
+        }
+      }
+
+      // 自动发射循环（随机间隔，偶尔齐发）
+      let autoTimer = null;
+      function scheduleNext() {
+        const delay = 1200 + Math.random() * 2000;
+        autoTimer = setTimeout(() => {
+          const active = fireworks.filter(f => !f.exploded).length;
+          if (active < 8) {
+            // 35% 概率齐发 3-7 个
+            if (Math.random() < 0.35 && active < 4) {
+              const n = 3 + Math.floor(Math.random() * 5);
+              for (let i = 0; i < n; i++) {
+                setTimeout(() => launchFirework(), i * 60 + Math.random() * 100);
+              }
+            } else {
+              launchFirework();
+            }
+          }
+          scheduleNext();
+        }, delay);
+      }
+      function startAutoLaunch() {
+        scheduleNext();
+      }
+
+      // 渲染循环
+      function animate() {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.fillRect(0, 0, W, H);
+
+        fireworks = fireworks.filter(f => {
+          if (!f.exploded) { f.update(); f.draw(ctx); return true; }
+          return false;
+        });
+
+        particles = particles.filter(p => {
+          p.update();
+          p.draw(ctx);
+          if (p.secondary && !p._triggered && p.life < p.maxLife * 0.12) {
+            p._triggered = true;
+            p.secondExplode(sparkles);
+            playCrackle();
+          }
+          return p.life > 0;
+        });
+
+        sparkles = sparkles.filter(s => {
+          s.update();
+          s.draw(ctx);
+          return s.life > 0;
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      // 点击发射
+      canvas.addEventListener("click", (e) => {
+        launchFirework(e.clientX, e.clientY - 30);
+      });
+
+      startAutoLaunch();
+      animate();
+
+      // 清除
+      document.getElementById("clear-btn").addEventListener("click", () => {
+        fireworks = []; particles = []; sparkles = [];
+      });
+
+      // 全屏
+      const fsBtn = document.getElementById("fullscreen-btn");
+      function updateFs() {
+        const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement
+          || document.mozFullScreenElement || document.msFullscreenElement);
+        fsBtn.innerHTML = isFS
+          ? '<svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>退出全屏'
+          : '<svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>全屏';
+      }
+      fsBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement
+          && !document.mozFullScreenElement && !document.msFullscreenElement) {
+          const el = document.documentElement;
+          (el.requestFullscreen || el.webkitRequestFullscreen
+            || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
+        } else {
+          (document.exitFullscreen || document.webkitExitFullscreen
+            || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
+        }
+      });
+      document.addEventListener("fullscreenchange", updateFs);
+      document.addEventListener("webkitfullscreenchange", updateFs);
+
+      // 键盘
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space" && e.target === document.body) {
+          e.preventDefault();
+          launchMultiple(1 + Math.floor(Math.random() * 4));
+        } else if (e.code === "KeyF" && e.target === document.body) {
+          e.preventDefault(); fsBtn.click();
+        } else if (e.code === "KeyC" && e.target === document.body) {
+          fireworks = []; particles = []; sparkles = [];
+        }
+      });
+    })();
+  </script></body></html>
