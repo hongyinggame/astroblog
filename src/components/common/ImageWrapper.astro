@@ -62,7 +62,7 @@ const isPublic = src.startsWith("/");
 let img: ImageMetadata | null = null;
 if (isLocal) {
 	const files = import.meta.glob<ImageMetadata>(
-		"../../**/*.{png,jpg,jpeg,webp,avif}",
+		"../../**/*.{avif,webp,jpg,jpeg,png,gif,svg}",
 		{
 			import: "default",
 		},

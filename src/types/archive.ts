@@ -5,5 +5,7 @@ export interface ArchiveItem {
   rating: number;
   cover: string;
   author?: string;
+  description?: string;
+  tags?: string[];
   type?: "movie" | "tv" | "小说" | "散文" | "诗歌" | "戏剧";
 }

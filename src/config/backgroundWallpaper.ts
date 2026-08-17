@@ -47,6 +47,10 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			"assets/images/DesktopWallpaper/neptune4.jpg",
 			"assets/images/DesktopWallpaper/neptune5.jpg",
 			"assets/images/DesktopWallpaper/neptune6.jpg",
+			"assets/images/DesktopWallpaper/l2.png",
+			"assets/images/DesktopWallpaper/1.png",
+			"assets/images/DesktopWallpaper/4.jpg",
+			"assets/images/DesktopWallpaper/3.jpg",
 		],
 		// 移动背景图片（支持单张或多张随机）
 		// mobile: "assets/images/MobileWallpaper/m1.avif",

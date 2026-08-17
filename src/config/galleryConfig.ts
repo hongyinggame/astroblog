@@ -42,6 +42,14 @@ export const galleryConfig: GalleryConfig = {
 			date: "2026-02-01",
 			tags: ["超次元游戏", "涅普缇努"],
 		},
+		{
+			id: "luofanchen",
+			name: "落凡尘",
+			description: "秋叶牵思半金缕，玉露泛朱杏落黄！",
+			location: "落凡尘 电影",
+			date: "2026-02-01",
+			tags: ["落凡尘"],
+		},
 	],
 
 	// 瀑布流最小列宽(px)，浏览器根据容器宽度自动计算列数，默认 240

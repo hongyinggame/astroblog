@@ -15,11 +15,11 @@ import { getAlbumCover, scanAlbumPhotos } from "@/utils/gallery-utils";
 
 // Import content images for resolving relative paths
 const postImageModules = import.meta.glob<ImageMetadata>(
-  "/src/content/posts/**/*.{avif,webp,jpg,jpeg,png}",
+  "/src/content/posts/**/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 const chatterImageModules = import.meta.glob<ImageMetadata>(
-  "/src/content/chatters/**/*.{avif,webp,jpg,jpeg,png}",
+  "/src/content/chatters/**/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 

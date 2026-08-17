@@ -328,13 +328,13 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 	.markdown-content code::before { content: none; }
 	.markdown-content code::after { content: none; }
 
-	.markdown-content blockquote {
+	.markdown-content blockquote:not(.callout) {
 		font-style: normal;
 		border-color: transparent;
 		position: relative;
 		font-weight: inherit;
 	}
-	.markdown-content blockquote::before {
+	.markdown-content blockquote:not(.callout)::before {
 		content: "";
 		position: absolute;
 		left: -0.25rem;
@@ -344,8 +344,8 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 		width: 0.25rem;
 		border-radius: 9999px;
 	}
-	.markdown-content blockquote p::before,
-	.markdown-content blockquote p::after {
+	.markdown-content blockquote:not(.callout) p::before,
+	.markdown-content blockquote:not(.callout) p::after {
 		content: none;
 	}
 

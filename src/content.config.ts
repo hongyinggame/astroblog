@@ -76,6 +76,8 @@ const booksCollection = defineCollection({
 		cover: z.string(),
 		author: z.string().optional(),
 		type: z.enum(["小说", "散文", "诗歌", "戏剧"]).optional(),
+		description: z.string().optional(),
+		tags: z.array(z.string()).optional().default([]),
 	}),
 });
 
@@ -87,6 +89,8 @@ const filmsCollection = defineCollection({
 		rating: z.number().min(0).max(10),
 		cover: z.string(),
 		type: z.enum(["movie", "tv"]).optional(),
+		description: z.string().optional(),
+		tags: z.array(z.string()).optional().default([]),
 	}),
 });
 

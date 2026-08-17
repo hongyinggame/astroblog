@@ -33,7 +33,7 @@ const chatters = await Promise.all(
 );
 
 const avatarModules = import.meta.glob<ImageMetadata>(
-  "/src/assets/images/*.{avif,webp,jpg,jpeg,png}",
+  "/src/assets/images/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 function resolveAvatarSrc(path: string): string {
@@ -257,13 +257,13 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 	[data-full-content] code::before,
 	[data-full-content] code::after { content: none; }
 
-	[data-full-content] blockquote {
+	[data-full-content] blockquote:not(.callout) {
 		font-style: normal;
 		border-color: transparent;
 		position: relative;
 		font-weight: inherit;
 	}
-	[data-full-content] blockquote::before {
+	[data-full-content] blockquote:not(.callout)::before {
 		content: "";
 		position: absolute;
 		left: -0.25rem;
@@ -273,8 +273,8 @@ const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
 		width: 0.25rem;
 		border-radius: 9999px;
 	}
-	[data-full-content] blockquote p::before,
-	[data-full-content] blockquote p::after { content: none; }
+	[data-full-content] blockquote:not(.callout) p::before,
+	[data-full-content] blockquote:not(.callout) p::after { content: none; }
 
 	[data-full-content] ul li::marker,
 	[data-full-content] ol li::marker {

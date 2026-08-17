@@ -33,7 +33,7 @@ const essays = await Promise.all(
 );
 
 const avatarModules = import.meta.glob<ImageMetadata>(
-  "/src/assets/images/*.{avif,webp,jpg,jpeg,png}",
+  "/src/assets/images/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 function resolveAvatarSrc(path: string): string {

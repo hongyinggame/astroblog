@@ -40,19 +40,33 @@
     {/if}
 
     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end pb-4">
-      <span class="text-yellow-400 text-xs tracking-wide">{filledStars}{emptyStars}</span>
-      <span class="text-white/80 text-[0.65rem] mt-1 text-center px-3 leading-tight">{ratingInfo.label}</span>
+      {#if item.description}
+        <p class="text-white/90 text-xs mt-2 text-center px-4 leading-snug line-clamp-3">{item.description}</p>
+      {/if}
+      <div class="mt-2 flex flex-col items-center">
+        <span class="text-yellow-400 text-xs tracking-wide">{filledStars}{emptyStars}</span>
+        <span class="text-white/80 text-[0.65rem] mt-0.5">{ratingInfo.label}</span>
+      </div>
     </div>
   </div>
 
   <div class="library-card-info">
     <div class="card-divider"></div>
     <h3 class="title">{item.title}</h3>
+    <div class="rating-row">
+      <span class="rating-score">{item.rating}</span>
+      <span class="rating-stars">{filledStars}{emptyStars}</span>
+    </div>
     <div class="meta">
-      <span>{item.rating}</span>
-      <span class="text-yellow-400 text-[0.65rem]">{filledStars}</span>
-      <span>· {new Date(item.published).getFullYear()}-{String(new Date(item.published).getMonth() + 1).padStart(2, '0')}</span>
+      <span>{new Date(item.published).getFullYear()}-{String(new Date(item.published).getMonth() + 1).padStart(2, '0')}</span>
       {#if item.author}<span>· {item.author}</span>{/if}
     </div>
+    {#if item.tags && item.tags.length > 0}
+      <div class="tags">
+        {#each item.tags as tag}
+          <span class="tag">{tag}</span>
+        {/each}
+      </div>
+    {/if}
   </div>
 </a>

@@ -24,11 +24,11 @@ const rawFilms = await getCollection("films");
 
 // Resolve cover images
 const bookImageModules = import.meta.glob<ImageMetadata>(
-  "/src/content/books/**/*.{avif,webp,jpg,jpeg,png}",
+  "/src/content/books/**/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 const filmImageModules = import.meta.glob<ImageMetadata>(
-  "/src/content/films/**/*.{avif,webp,jpg,jpeg,png}",
+  "/src/content/films/**/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 
@@ -59,6 +59,8 @@ const books: ArchiveItem[] = rawBooks.map((entry) => ({
   cover: resolveCover(entry.data.cover, "/src/content/books", bookImageModules),
   author: entry.data.author,
   type: entry.data.type,
+  description: entry.data.description,
+  tags: entry.data.tags,
 }));
 
 const films: ArchiveItem[] = rawFilms.map((entry) => ({
@@ -68,6 +70,8 @@ const films: ArchiveItem[] = rawFilms.map((entry) => ({
   rating: entry.data.rating,
   cover: resolveCover(entry.data.cover, "/src/content/films", filmImageModules),
   type: entry.data.type,
+  description: entry.data.description,
+  tags: entry.data.tags,
 }));
 
 // Background wallpaper

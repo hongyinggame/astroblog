@@ -55,7 +55,7 @@ if (
 
 // Eagerly import all wallpaper images to resolve their URLs for client-side random switching
 const wallpaperModules = import.meta.glob<ImageMetadata>(
-  "/src/assets/images/DesktopWallpaper/*.{avif,webp,jpg,jpeg,png}",
+  "/src/assets/images/DesktopWallpaper/*.{avif,webp,jpg,jpeg,png,gif,svg}",
   { eager: true, import: "default" },
 );
 
